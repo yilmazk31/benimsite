@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yılmaz Karabulut Oyun</title>
+<title>YılmazK Oyun</title>
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#000; color:#fff; text-align:center; }
-h1,h2,h3 { color:#0d6efd; }
-#name-screen { position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:500; }
-#name-screen input { padding:10px; font-size:16px; margin-top:10px; border-radius:5px; border:none; text-align:center; }
-#name-screen button { margin-top:10px; padding:10px 20px; background:#0d6efd; color:#fff; border:none; border-radius:5px; cursor:pointer; font-weight:bold; }
+h1,h2,h3 { color:#0d6efd; margin:5px; }
+#name-screen { position:fixed;top:0;left:0;width:100%;height:100%;background:#111;display:flex;flex-direction:column;justify-content:center;align-items:center; z-index:500; }
+#name-screen input, #name-screen button { padding:10px; font-size:16px; margin-top:10px; }
+#name-screen button { background:#0d6efd; color:#fff; border:none; border-radius:5px; cursor:pointer; }
 #game-area { position:relative; width:90%; max-width:400px; height:400px; background:#111; border:2px solid #0d6efd; margin:20px auto; overflow:hidden; border-radius:10px; }
-#player { position:absolute; bottom:10px; left:175px; width:50px; height:50px; border-radius:50%; transition:left 0.05s linear; background:lime; display:flex; justify-content:center; align-items:center; font-size:24px; }
+#player { position:absolute; bottom:10px; left:175px; width:50px; height:50px; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:24px; background:lime; transition:left 0.05s linear; }
 .falling { position:absolute; top:0; width:30px; height:30px; border-radius:50%; }
 .coin { background:gold; box-shadow:0 0 15px gold; }
 .enemy { background:red; box-shadow:0 0 15px red; }
@@ -27,19 +27,16 @@ h1,h2,h3 { color:#0d6efd; }
 #info { margin:20px; padding:10px; background:#111; border:1px solid #0d6efd; border-radius:10px; text-align:left; }
 #global-table { margin:10px auto; width:90%; max-width:400px; border-collapse:collapse; }
 #global-table th, #global-table td { border:1px solid #0d6efd; padding:5px; color:#fff; }
-#name-title { font-size:2em; color:#0d6efd; margin-bottom:10px; }
 </style>
 </head>
 <body>
 
 <div id="name-screen">
-  <div id="name-title">YılmazK Oyun</div>
+  <h1>YılmazK Oyun</h1>
   <h2>Oyuncu Adınızı Girin</h2>
   <input type="text" id="player-name-input" placeholder="İsminizi yazın">
   <button id="save-name-btn">Başla</button>
 </div>
-
-<h1>Yılmaz Karabulut Oyun</h1>
 
 <div id="game-area">
   <div id="player"></div>
@@ -59,9 +56,9 @@ h1,h2,h3 { color:#0d6efd; }
 
 <div id="shop">
   <h3>Dükkan</h3>
-  <div class="shop-item" data-cost="50" data-type="hat">Şapka - 50</div>
-  <div class="shop-item" data-cost="100" data-type="outfit">Elbise - 100</div>
-  <div class="shop-item" data-cost="150" data-type="face">Yüz İfadesi - 150</div>
+  <div class="shop-item" data-cost="50" data-type="hat">🎩 Şapka - 50</div>
+  <div class="shop-item" data-cost="100" data-type="outfit">👕 Elbise - 100</div>
+  <div class="shop-item" data-cost="150" data-type="face">😎 Yüz - 150</div>
 </div>
 
 <div id="info">
@@ -72,7 +69,6 @@ h1,h2,h3 { color:#0d6efd; }
 
 <h3>İletişim</h3>
 <p>Yardım için: <a href="mailto:yilmazkarabulut@akhisarkoleji.com">yilmazkarabulut@akhisarkoleji.com</a></p>
-<p>Instagram: <a href="https://www.instagram.com/ykk388?igsh=bm5pM3lub3liNzl2&utm_source=qr" target="_blank">@ykk388</a></p>
 
 <h3>Global Skor Tablosu</h3>
 <table id="global-table">
@@ -84,106 +80,86 @@ h1,h2,h3 { color:#0d6efd; }
 
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
-
-// Firebase yapılandırması
-const firebaseConfig = {
-  apiKey: "BURAYA",
-  authDomain: "BURAYA",
-  databaseURL: "BURAYA",
-  projectId: "BURAYA",
-  storageBucket: "BURAYA",
-  messagingSenderId: "BURAYA",
-  appId: "BURAYA"
-};
+const firebaseConfig = { apiKey:"BURAYA", authDomain:"BURAYA", databaseURL:"BURAYA", projectId:"BURAYA", storageBucket:"BURAYA", messagingSenderId:"BURAYA", appId:"BURAYA"};
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// DOM elemanları
-const nameScreen=document.getElementById('name-screen');
-const playerNameInput=document.getElementById('player-name-input');
-const saveBtn=document.getElementById('save-name-btn');
-const restartBtn=document.getElementById('restart-btn');
-const gameOverlay=document.getElementById('game-overlay');
-const overlayMessage=document.getElementById('overlay-message');
-const player=document.getElementById('player');
-const gameArea=document.getElementById('game-area');
-const scoreDisplay=document.getElementById('score-display');
-const moneyDisplay=document.getElementById('money-display');
-const timeDisplay=document.getElementById('time-display');
-const healthInner=document.getElementById('health-inner');
-const shopItems=document.querySelectorAll('.shop-item');
-const globalTable=document.getElementById('global-table');
+const nameScreen = document.getElementById('name-screen');
+const playerNameInput = document.getElementById('player-name-input');
+const saveBtn = document.getElementById('save-name-btn');
+const restartBtn = document.getElementById('restart-btn');
+const gameOverlay = document.getElementById('game-overlay');
+const overlayMessage = document.getElementById('overlay-message');
+const player = document.getElementById('player');
+const gameArea = document.getElementById('game-area');
+const scoreDisplay = document.getElementById('score-display');
+const moneyDisplay = document.getElementById('money-display');
+const timeDisplay = document.getElementById('time-display');
+const healthInner = document.getElementById('health-inner');
+const shopItems = document.querySelectorAll('.shop-item');
+const globalTable = document.getElementById('global-table');
 
 let score=0, money=100, time=0, health=100, gameActive=false, playerPos=175, keys={}, selectedHat=null, selectedOutfit=null, selectedFace=null;
 let fallingObjects=[];
 
-// Başlat butonu
-saveBtn.addEventListener('click',()=>{
-  let val=playerNameInput.value.trim();
-  window.playerName=val?val:'Oyuncu';
+function updatePlayerAppearance(){ 
+  player.textContent = (selectedHat||'') + (selectedOutfit||'') + (selectedFace||''); 
+}
+
+// --- Başlat ---
+saveBtn.addEventListener('click', ()=>{
+  let val = playerNameInput.value.trim();
+  window.playerName = val ? val : 'Oyuncu';
   nameScreen.style.display='none';
   loadPlayerData(window.playerName, startGame);
 });
 
-// Yeniden başlat
-restartBtn.addEventListener('click',()=>{
+restartBtn.addEventListener('click', ()=>{
   gameOverlay.style.display='none';
   startGame();
 });
 
-// Kontroller
-document.addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; });
-document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
-document.getElementById('left-btn').addEventListener('touchstart',()=>{ keys['a']=true; });
-document.getElementById('left-btn').addEventListener('touchend',()=>{ keys['a']=false; });
-document.getElementById('right-btn').addEventListener('touchstart',()=>{ keys['d']=true; });
-document.getElementById('right-btn').addEventListener('touchend',()=>{ keys['d']=false; });
+// --- Kontroller ---
+document.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+document.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+document.getElementById('left-btn').addEventListener('touchstart',()=> keys['a']=true);
+document.getElementById('left-btn').addEventListener('touchend',()=> keys['a']=false);
+document.getElementById('right-btn').addEventListener('touchstart',()=> keys['d']=true);
+document.getElementById('right-btn').addEventListener('touchend',()=> keys['d']=false);
 
-// Shop
+// --- Shop ---
 shopItems.forEach(item=>{
-  item.addEventListener('click',()=>{
-    const cost=parseInt(item.dataset.cost);
-    const type=item.dataset.type;
+  item.addEventListener('click', ()=>{
+    const cost=parseInt(item.dataset.cost), type=item.dataset.type;
     if(money>=cost){
       money-=cost;
       if(type==='hat') selectedHat='🎩';
       if(type==='outfit') selectedOutfit='👕';
       if(type==='face') selectedFace='😎';
       moneyDisplay.textContent=money;
-      savePlayerData(window.playerName); // kalıcı
       updatePlayerAppearance();
+      savePlayerData(window.playerName);
     }
   });
 });
 
-// Player görünümü
-function updatePlayerAppearance(){
-  player.textContent = (selectedHat||'') + (selectedOutfit||'') + (selectedFace||'');
-}
-
-// Firebase yükleme
+// --- Firebase ---
 function loadPlayerData(name, callback){
-  db.ref('players/'+name).once('value',snapshot=>{
+  db.ref('players/'+name).once('value', snapshot=>{
     const data=snapshot.val();
     if(data){
-      if(data.selectedHat) selectedHat=data.selectedHat;
-      if(data.selectedOutfit) selectedOutfit=data.selectedOutfit;
-      if(data.selectedFace) selectedFace=data.selectedFace;
-      money=data.money||100;
+      selectedHat = data.selectedHat || null;
+      selectedOutfit = data.selectedOutfit || null;
+      selectedFace = data.selectedFace || null;
+      money = data.money || 100;
     }
     updatePlayerAppearance();
     callback();
   });
 }
+function savePlayerData(name){ db.ref('players/'+name).set({selectedHat, selectedOutfit, selectedFace, money}); }
 
-// Firebase kaydetme
-function savePlayerData(name){
-  db.ref('players/'+name).set({
-    selectedHat, selectedOutfit, selectedFace, money
-  });
-}
-
-// Oyun başlat
+// --- Oyun ---
 function startGame(){
   score=0; time=0; health=100; gameActive=true; playerPos=175;
   player.style.left=playerPos+'px';
@@ -193,73 +169,47 @@ function startGame(){
   requestAnimationFrame(gameLoop);
 }
 
-// Objeler
 function spawnObject(){
-  const obj=document.createElement('div');
-  obj.classList.add('falling');
-  obj.style.left=Math.random()*370+'px';
-  obj.style.top='0px';
+  const obj=document.createElement('div'); obj.classList.add('falling'); obj.style.left=Math.random()*370+'px'; obj.style.top='0px';
   const r=Math.random();
   if(r<0.55) obj.classList.add('coin');
   else if(r<0.85) obj.classList.add('enemy');
   else if(r<0.95) obj.classList.add('bonus');
-  else obj.classList.add('heart'); // nadir can artıran kalp
-  gameArea.appendChild(obj);
-  fallingObjects.push(obj);
+  else obj.classList.add('heart');
+  gameArea.appendChild(obj); fallingObjects.push(obj);
 }
 
-// Oyun döngüsü
 function gameLoop(){
   if(!gameActive) return;
   time++; timeDisplay.textContent=time;
-
   if(keys['a'] && playerPos>0) playerPos-=5;
   if(keys['d'] && playerPos<350) playerPos+=5;
   player.style.left=playerPos+'px';
-
   if(Math.random()<0.02) spawnObject();
-
   for(let i=fallingObjects.length-1;i>=0;i--){
-    let obj=fallingObjects[i];
-    obj.style.top=parseInt(obj.style.top)+2+'px';
+    let obj=fallingObjects[i]; obj.style.top=parseInt(obj.style.top)+2+'px';
     const objLeft=parseInt(obj.style.left), objTop=parseInt(obj.style.top);
     if(objTop+30>=350 && objLeft+30>playerPos && objLeft<playerPos+50){
       if(obj.classList.contains('coin')){ score+=10; money+=5; }
       else if(obj.classList.contains('enemy')){ health-=20; }
       else if(obj.classList.contains('bonus')){ money+=20; score+=20; }
-      else if(obj.classList.contains('heart')){ health=Math.min(100, health+20); } // can artır
+      else if(obj.classList.contains('heart')){ health=Math.min(100, health+20); }
       obj.remove(); fallingObjects.splice(i,1);
     } else if(objTop>400){ obj.remove(); fallingObjects.splice(i,1); }
   }
-
-  scoreDisplay.textContent=score;
-  moneyDisplay.textContent=money;
-  healthInner.style.width=health+'%';
-
-  if(health<=0){ 
-    gameActive=false; 
-    overlayMessage.textContent='Kaybettiniz 😢'; 
-    gameOverlay.style.display='flex'; 
-    savePlayerData(window.playerName); 
-    updateGlobalScore(window.playerName, score); 
-  }
-
+  scoreDisplay.textContent=score; moneyDisplay.textContent=money; healthInner.style.width=health+'%';
+  if(health<=0){ gameActive=false; overlayMessage.textContent='Kaybettiniz 😢'; gameOverlay.style.display='flex'; savePlayerData(window.playerName); updateGlobalScore(window.playerName, score); }
   if(gameActive) requestAnimationFrame(gameLoop);
 }
 
-// Global skor
+// --- Global Skor ---
 function updateGlobalScore(playerName, score){
   db.ref('scores/'+playerName).set(score);
   db.ref('scores').orderByValue().limitToLast(10).once('value',snapshot=>{
-    let html='<tr><th>Sıra</th><th>İsim</th><th>Skor</th></tr>';
-    let arr=[];
-    snapshot.forEach(child=>{
-      arr.push({name:child.key, score:child.val()});
-    });
+    let html='<tr><th>Sıra</th><th>İsim</th><th>Skor</th></tr>'; let arr=[];
+    snapshot.forEach(child=> arr.push({name:child.key, score:child.val()}));
     arr.sort((a,b)=>b.score-a.score);
-    arr.forEach((item,i)=>{
-      html+='<tr><td>'+(i+1)+'</td><td>'+item.name+'</td><td>'+item.score+'</td></tr>';
-    });
+    arr.forEach((item,i)=> html+='<tr><td>'+(i+1)+'</td><td>'+item.name+'</td><td>'+item.score+'</td></tr>');
     globalTable.innerHTML=html;
   });
 }
