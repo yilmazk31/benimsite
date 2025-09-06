@@ -4,49 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Yılmaz Karabulut - Oyun Geliştirici</title>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
-body {margin:0;font-family:'Roboto',sans-serif;background:#1e1e1e;color:#fff;scroll-behavior:smooth;}
-nav {position:fixed;top:0;width:100%;background:#0d6efd;padding:15px;text-align:center;z-index:100;}
-nav a {margin:0 15px;color:#fff;text-decoration:none;font-weight:bold;transition:0.3s;}
+body {margin:0;font-family:sans-serif;background:#1e1e1e;color:#fff;}
+nav{position:fixed;top:0;width:100%;background:#0d6efd;padding:15px;text-align:center;z-index:100;}
+nav a{margin:0 15px;color:#fff;text-decoration:none;font-weight:bold;}
 nav a:hover{text-decoration:underline;}
-header {text-align:center;padding:150px 20px 100px 20px;position:relative;overflow:hidden;}
-header h1{margin:0;font-size:3em;animation:fadeIn 2s ease-in-out;}
-header p{font-size:1.2em;margin-top:10px;}
+header{text-align:center;padding:150px 20px 100px 20px;position:relative;overflow:hidden;}
 header::after{content:"";background:url('https://cdn.pixabay.com/photo/2017/05/10/20/30/video-game-2306740_1280.jpg') center/cover no-repeat;opacity:0.2;position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;}
-@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 section{padding:60px 20px;max-width:1000px;margin:0 auto;}
-h2{text-align:center;margin-bottom:40px;font-size:2em;color:#0d6efd;}
-.games,.projects,.skills,.blog{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;}
-.game,.project,.skill,.blog-item{background:#2c2c2c;border-radius:10px;padding:20px;width:300px;text-align:center;box-shadow:0 5px 15px rgba(0,0,0,0.3);transition:0.3s;cursor:pointer;position:relative;}
-.game:hover,.project:hover,.skill:hover,.blog-item:hover{transform:translateY(-5px);box-shadow:0 10px 20px rgba(0,0,0,0.5);}
-.game img,.project img{max-width:100%;border-radius:10px;}
-.game h3,.project h3,.skill h3,.blog-item h3{margin:15px 0 10px;color:#6a11cb;}
-.project p,.blog-item p{font-size:0.95em;}
-.contact-container{display:flex;justify-content:center;flex-wrap:wrap;gap:20px;margin-bottom:20px;}
-.contact-btn{display:inline-block;padding:10px 20px;background-color:#ff6600;color:#fff;border-radius:5px;border:none;cursor:pointer;font-weight:bold;transition:0.3s;text-decoration:none;}
-.contact-btn:hover{background-color:#e05500;}
-form input, form textarea{width:100%;padding:10px;margin-bottom:15px;border-radius:5px;border:1px solid #ccc;font-size:1em;}
-footer{background:#0d6efd;color:#fff;text-align:center;padding:20px;}
-#game-area{position:relative;width:400px;height:400px;background:#111;border:2px solid #0d6efd;margin:20px auto;overflow:hidden;border-radius:10px;}
+#about{background:#0d6efd;color:#fff;padding:20px;margin-bottom:40px;border-radius:10px;}
+#game-area{position:relative;width:90%;max-width:400px;height:400px;background:#111;border:2px solid #0d6efd;margin:20px auto;overflow:hidden;border-radius:10px;}
 #player{position:absolute;width:50px;height:50px;background:red;bottom:0;left:175px;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:24px;transition:none;}
-#score-display,#level-display,#time-display,#money-display{font-size:1.5em; font-weight:bold; padding:5px 10px; background:#222; border-radius:10px; margin:5px;}
 #game-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:2em;border-radius:5px;display:none;}
 #game-overlay button{margin-top:20px;padding:10px 20px;background:#0d6efd;color:#fff;border:none;border-radius:5px;cursor:pointer;}
 #shop{margin:20px auto;text-align:center;display:flex;justify-content:center;flex-wrap:wrap;gap:10px;}
 .shop-item{display:inline-block;margin:10px;padding:10px 15px;background:#0d6efd;color:#fff;border-radius:5px;cursor:pointer;transition:0.3s;}
 .shop-item.locked{background:#555;cursor:not-allowed;}
-.shop-item:hover:not(.locked){background:#0b5ed7;}
 #control-buttons{display:flex;justify-content:center;gap:10px;margin-top:10px;}
 .control-btn{padding:8px 15px;background:#ff6600;color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:bold;}
-.control-btn:hover{background:#e05500;}
-#mobile-controls{display:none; text-align:center; margin-top:10px;}
-@media (max-width:500px){
-  #game-area{width:90%; height:300px;}
-  #player{width:40px; height:40px;}
-  #mobile-controls{display:flex; justify-content:center; gap:10px; margin-top:10px;}
-  .control-btn{padding:15px 20px; font-size:1.2em;}
-}
+#mobile-controls{display:none;text-align:center;margin-top:10px;}
+.health-bar{width:100%;background:#555;height:20px;border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.health-inner{width:100%;height:100%;background:red;}
+.scoreboard{display:flex;justify-content:space-between;align-items:center;max-width:400px;margin:10px auto;}
+@media(max-width:500px){#game-area{height:300px;}#player{width:40px;height:40px;}#mobile-controls{display:flex;justify-content:center;gap:10px;}}
 </style>
 </head>
 <body>
@@ -63,77 +43,60 @@ footer{background:#0d6efd;color:#fff;text-align:center;padding:20px;}
 <p>Oyun Geliştirici 🎮</p>
 </header>
 
-<section id="about" style="width:100%; background:#0d6efd; color:#fff; padding:20px; margin-bottom:40px; border-radius:10px;">
+<section id="about">
 <p><strong>Yaş:</strong> 15 | <strong>Okul:</strong> Akhisar Koleji Fen Lisesi | <strong>Şehir:</strong> Manisa / Akhisar | <strong>Sınıf:</strong> 10. sınıf</p>
 <p><strong>Hobiler:</strong> Oyun oynamak, gezmek</p>
 </section>
 
 <section id="games">
 <h2>Oyunlarım</h2>
-<div class="games">
-  <div class="game">
-    <h3>Brawl Stars</h3>
-    <a href="https://supercell.com/en/games/brawlstars/" target="_blank">
-      <img src="https://supercell.com/static/images/games/brawlstars/brawlstars_logo.png" alt="Brawl Stars">
-    </a>
-  </div>
-  <div class="game">
-    <h3>PUBG Mobile</h3>
-    <a href="https://www.pubgmobile.com/tr/home.shtml" target="_blank">
-      <img src="https://upload.wikimedia.org/wikipedia/en/6/62/PUBG_Mobile_Logo.png" alt="PUBG Mobile">
-    </a>
-  </div>
-  <div class="game">
-    <h3>Roblox</h3>
-    <a href="https://www.roblox.com/" target="_blank">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Roblox_Logo.png" alt="Roblox">
-    </a>
-  </div>
+<div style="display:flex;justify-content:center;flex-wrap:wrap;gap:20px;">
+<div class="game"><h3>Brawl Stars</h3><a href="https://supercell.com/en/games/brawlstars/" target="_blank"><img src="https://supercell.com/static/images/games/brawlstars/brawlstars_logo.png" style="width:100px;"></a></div>
+<div class="game"><h3>PUBG Mobile</h3><a href="https://www.pubgmobile.com/tr/home.shtml" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/en/6/62/PUBG_Mobile_Logo.png" style="width:100px;"></a></div>
+<div class="game"><h3>Roblox</h3><a href="https://www.roblox.com/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/5/5a/Roblox_Logo.png" style="width:100px;"></a></div>
 </div>
 </section>
 
 <section id="mini-game">
-<h2>Mini Oyun: Düşen Yıldızları Yakala!</h2>
-<div style="text-align:center; margin-bottom:15px;" id="control-buttons">
-  <button id="start-btn" class="control-btn">Oyunu Başlat</button>
-  <button id="stop-btn" class="control-btn">Oyunu Durdur</button>
+<h2>Mini Oyun</h2>
+<div class="scoreboard">
+<div>Oyuncu: Yılmaz Karabulut</div>
+<div>Dünya Sıralaması: 12</div>
 </div>
-
+<div class="health-bar"><div id="health-inner" class="health-inner"></div></div>
+<div style="text-align:center;margin-bottom:10px;" id="control-buttons">
+<button id="start-btn" class="control-btn">Oyunu Başlat</button>
+<button id="stop-btn" class="control-btn">Oyunu Durdur</button>
+</div>
 <div id="mobile-controls">
-  <button id="left-btn" class="control-btn">⬅️</button>
-  <button id="right-btn" class="control-btn">➡️</button>
+<button id="left-btn" class="control-btn">⬅️</button>
+<button id="right-btn" class="control-btn">➡️</button>
 </div>
-
-<p>
-Seviye: <span id="level-display">1</span> | 
-Puan: <span id="score-display">0</span> | 
-Para: <span id="money-display">100</span> | 
-Kalan Süre: <span id="time-display">30</span>s
-</p>
+<p>Puan: <span id="score-display">0</span> | Para: <span id="money-display">100</span> | Kalan Süre: <span id="time-display">30</span>s</p>
 <div id="game-area">
-  <div id="player"></div>
-  <div id="game-overlay">
-    <div id="overlay-message">Kaybettiniz 😢</div>
-    <button id="restart-btn">Yeniden Başlat</button>
-  </div>
+<div id="player"></div>
+<div id="game-overlay">
+<div id="overlay-message">Kaybettiniz 😢</div>
+<button id="restart-btn">Yeniden Başlat</button>
+</div>
 </div>
 
 <h3 style="text-align:center;margin-top:20px;">Shop / Dükkan</h3>
 <div id="shop">
-  <div class="shop-item locked" data-cost="5" onclick="buyCostume(this)">Mavi Kostüm - 5 Para</div>
-  <div class="shop-item locked" data-cost="10" onclick="buyCostume(this)">Yeşil Kostüm - 10 Para</div>
-  <div class="shop-item locked" data-cost="15" onclick="buyCostume(this)">Turuncu Kostüm - 15 Para</div>
-  <div class="shop-item locked" data-cost="20" onclick="buyCostume(this)">Mor Kostüm - 20 Para</div>
-  <div class="shop-item" data-cost="0" onclick="selectCostume('şapka')">Şapka</div>
+<div class="shop-item locked" data-cost="5" onclick="buyCostume(this)">Mavi Kostüm - 5 Para</div>
+<div class="shop-item locked" data-cost="10" onclick="buyCostume(this)">Yeşil Kostüm - 10 Para</div>
+<div class="shop-item locked" data-cost="15" onclick="buyCostume(this)">Turuncu Kostüm - 15 Para</div>
+<div class="shop-item locked" data-cost="20" onclick="buyCostume(this)">Mor Kostüm - 20 Para</div>
+<div class="shop-item" data-cost="0" onclick="selectCostume('şapka')">Şapka</div>
 </div>
 </section>
 
 <section id="contact">
 <h2>İletişim</h2>
-<div class="contact-container">
-<a class="contact-btn" href="mailto:yilmazkarabulut@akhisarkoleji.com">E-posta Gönder</a>
-<a class="contact-btn" href="tel:+905406122222">Telefon: 0540 612 22 22</a>
-<a class="contact-btn" href="https://www.instagram.com/ykk388?igsh=bm5pM3lub3liNzl2&utm_source=qr" target="_blank">Instagram</a>
+<div style="text-align:center;">
+<a href="mailto:yilmazkarabulut@akhisarkoleji.com" style="display:inline-block;margin:5px;padding:10px;background:#0d6efd;color:#fff;border-radius:5px;text-decoration:none;">E-posta</a>
+<a href="tel:+905406122222" style="display:inline-block;margin:5px;padding:10px;background:#0d6efd;color:#fff;border-radius:5px;text-decoration:none;">Telefon: 0540 612 22 22</a>
+<a href="https://www.instagram.com/ykk388?igsh=bm5pM3lub3liNzl2&utm_source=qr" target="_blank" style="display:inline-block;margin:5px;padding:10px;background:#0d6efd;color:#fff;border-radius:5px;text-decoration:none;">Instagram</a>
 </div>
 </section>
 
@@ -141,138 +104,137 @@ Kalan Süre: <span id="time-display">30</span>s
 const player=document.getElementById('player');
 const gameArea=document.getElementById('game-area');
 const scoreDisplay=document.getElementById('score-display');
-const levelDisplay=document.getElementById('level-display');
 const moneyDisplay=document.getElementById('money-display');
 const timeDisplay=document.getElementById('time-display');
+const healthInner=document.getElementById('health-inner');
 const overlay=document.getElementById('game-overlay');
 const overlayMessage=document.getElementById('overlay-message');
 const startBtn=document.getElementById('start-btn');
 const stopBtn=document.getElementById('stop-btn');
 const restartBtn=document.getElementById('restart-btn');
 
-let score=0,level=1,time=30,gameActive=false,fallingObjects=[],playerSpeed=10;
-let leftPressed=false, rightPressed=false;
-let currentCostume='red';
+let score=0,money=100,time=30,health=100,gameActive=false,fallingObjects=[],playerSpeed=5;
+let leftPressed=false,rightPressed=false,currentCostume='red';
 
 function applyCostume(){
-  if(currentCostume=='mavi kostüm') player.style.background='blue';
-  else if(currentCostume=='yeşil kostüm') player.style.background='green';
-  else if(currentCostume=='turuncu kostüm') player.style.background='orange';
-  else if(currentCostume=='mor kostüm') player.style.background='purple';
-  else if(currentCostume=='şapka') player.style.background='red'; 
-  else player.style.background='red';
+if(currentCostume=='mavi kostüm') player.style.background='blue';
+else if(currentCostume=='yeşil kostüm') player.style.background='green';
+else if(currentCostume=='turuncu kostüm') player.style.background='orange';
+else if(currentCostume=='mor kostüm') player.style.background='purple';
+else if(currentCostume=='şapka') player.style.background='red';
+else player.style.background='red';
 }
 
 function buyCostume(item){
-  const cost = parseInt(item.dataset.cost);
-  if(cost<=100){ 
-    item.classList.remove('locked'); 
-    currentCostume = item.textContent.split('-')[0].trim().toLowerCase();
-    applyCostume();
-  } else { 
-    alert('Yeterli paranız yok!'); 
-  }
+const cost=parseInt(item.dataset.cost);
+if(cost<=money){item.classList.remove('locked');currentCostume=item.textContent.split('-')[0].trim().toLowerCase();applyCostume();}
+else alert('Yeterli paranız yok!');
 }
 
-function selectCostume(name){
-  currentCostume = name;
-  applyCostume();
-}
+function selectCostume(name){currentCostume=name;applyCostume();}
 
 function startGame(){
-  gameActive=true;
-  overlay.style.display='none';
-  score=0;level=1;time=30;
-  scoreDisplay.textContent=score;
-  levelDisplay.textContent=level;
-  timeDisplay.textContent=time;
-  fallingObjects=[];
-  spawnFallingObject();
-  requestAnimationFrame(movePlayer);
+gameActive=true;overlay.style.display='none';
+score=0;money=100;time=30;health=100;
+scoreDisplay.textContent=score;moneyDisplay.textContent=money;timeDisplay.textContent=time;healthInner.style.width='100%';
+fallingObjects.forEach(obj=>obj.remove());fallingObjects=[];
+spawnFallingObject();spawnDangerObject();
+requestAnimationFrame(movePlayer);
+startTimer();
 }
 
-function stopGame(){
-  gameActive=false;
-  overlay.style.display='flex';
-  overlayMessage.textContent='Oyun Durduruldu ⏸️';
-}
+function stopGame(){gameActive=false;overlay.style.display='flex';overlayMessage.textContent='Oyun Durduruldu ⏸️';fallingObjects.forEach(obj=>obj.remove());fallingObjects=[];}
 
-function restartGame(){
-  overlay.style.display='none';
-  startGame();
-}
+function restartGame(){overlay.style.display='none';startGame();}
 
-// Bilgisayar
-document.addEventListener('keydown', e=>{
-  if(e.key==='ArrowLeft') leftPressed=true;
-  if(e.key==='ArrowRight') rightPressed=true;
+document.addEventListener('keydown',e=>{
+if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') leftPressed=true;
+if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') rightPressed=true;
 });
-document.addEventListener('keyup', e=>{
-  if(e.key==='ArrowLeft') leftPressed=false;
-  if(e.key==='ArrowRight') rightPressed=false;
+document.addEventListener('keyup',e=>{
+if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') leftPressed=false;
+if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') rightPressed=false;
 });
 
-// Mobil
 const leftBtn=document.getElementById('left-btn');
 const rightBtn=document.getElementById('right-btn');
-
 leftBtn.addEventListener('touchstart',()=>{leftPressed=true;});
 leftBtn.addEventListener('touchend',()=>{leftPressed=false;});
 rightBtn.addEventListener('touchstart',()=>{rightPressed=true;});
 rightBtn.addEventListener('touchend',()=>{rightPressed=false;});
 
-// Hareket loop
 function movePlayer(){
-  if(!gameActive) return;
-  let left = parseInt(player.style.left || 175);
-  if(leftPressed){ left -= playerSpeed; if(left<0) left=0;}
-  if(rightPressed){ left += playerSpeed; if(left>gameArea.offsetWidth-50) left=gameArea.offsetWidth-50;}
-  player.style.left=left+'px';
-  requestAnimationFrame(movePlayer);
+if(!gameActive) return;
+let left=parseInt(player.style.left || 175);
+if(leftPressed){left-=playerSpeed;if(left<0)left=0;}
+if(rightPressed){left+=playerSpeed;if(left>gameArea.offsetWidth-50)left=gameArea.offsetWidth-50;}
+player.style.left=left+'px';
+requestAnimationFrame(movePlayer);
 }
 
-// Falling Objects
+// Falling coins/objects
 function spawnFallingObject(){
-  if(!gameActive) return;
-  const obj=document.createElement('div');
-  obj.classList.add('star');
-  obj.style.left=Math.floor(Math.random()*(gameArea.offsetWidth-20))+'px';
-  obj.style.top='0px';
-  obj.style.width='20px'; obj.style.height='20px'; obj.style.background='yellow'; obj.style.position='absolute'; obj.style.borderRadius='50%';
-  gameArea.appendChild(obj);
-  fallingObjects.push(obj);
-  moveFallingObject(obj);
-  setTimeout(spawnFallingObject,1500 - level*100);
+if(!gameActive) return;
+const obj=document.createElement('div');
+obj.style.left=Math.floor(Math.random()*(gameArea.offsetWidth-20))+'px';
+obj.style.top='0px'; obj.style.width='20px'; obj.style.height='20px'; obj.style.background='yellow'; obj.style.position='absolute'; obj.style.borderRadius='50%';
+gameArea.appendChild(obj); fallingObjects.push(obj);
+moveFallingObject(obj);
+setTimeout(spawnFallingObject,1500);
 }
 
 function moveFallingObject(obj){
-  if(!gameActive) return;
-  let top=parseInt(obj.style.top);
-  const interval=setInterval(()=>{
-    if(!gameActive){clearInterval(interval); return;}
-    top+=2 + level; 
-    obj.style.top=top+'px';
-    const playerRect=player.getBoundingClientRect();
-    const objRect=obj.getBoundingClientRect();
-    if(!(playerRect.right<objRect.left || playerRect.left>objRect.right || playerRect.bottom<objRect.top || playerRect.top>objRect.bottom)){
-      score+=10;
-      scoreDisplay.textContent=score;
-      obj.remove();
-      clearInterval(interval);
-      if(score>=level*50 && level<10){
-        level++;
-        levelDisplay.textContent=level;
-      } 
-    }
-    if(top>gameArea.offsetHeight){obj.remove(); clearInterval(interval);}
-    if(level>=10){endGame(true);}
-  },30);
+if(!gameActive) return;
+let top=parseInt(obj.style.top);
+const interval=setInterval(()=>{
+if(!gameActive){clearInterval(interval);obj.remove();return;}
+top+=2;obj.style.top=top+'px';
+const playerRect=player.getBoundingClientRect();
+const objRect=obj.getBoundingClientRect();
+if(!(playerRect.right<objRect.left||playerRect.left>objRect.right||playerRect.bottom<objRect.top||playerRect.top>objRect.bottom)){
+score+=10;money+=5;
+scoreDisplay.textContent=score;moneyDisplay.textContent=money;
+obj.remove();clearInterval(interval);
+}
+if(top>gameArea.offsetHeight){obj.remove();clearInterval(interval);}
+},30);
 }
 
-function endGame(win=false){
-  gameActive=false;
-  overlay.style.display='flex';
-  overlayMessage.textContent=win?'Kazandınız 🎉':'Kaybettiniz 😢';
+// Danger objects
+function spawnDangerObject(){
+if(!gameActive) return;
+const obj=document.createElement('div');
+obj.style.left=Math.floor(Math.random()*(gameArea.offsetWidth-20))+'px';
+obj.style.top='0px'; obj.style.width='20px'; obj.style.height='20px'; obj.style.background='purple'; obj.style.position='absolute'; obj.style.borderRadius='50%';
+gameArea.appendChild(obj); fallingObjects.push(obj);
+moveDangerObject(obj);
+setTimeout(spawnDangerObject,3000);
+}
+
+function moveDangerObject(obj){
+if(!gameActive) return;
+let top=parseInt(obj.style.top);
+const interval=setInterval(()=>{
+if(!gameActive){clearInterval(interval);obj.remove();return;}
+top+=3;obj.style.top=top+'px';
+const playerRect=player.getBoundingClientRect();
+const objRect=obj.getBoundingClientRect();
+if(!(playerRect.right<objRect.left||playerRect.left>objRect.right||playerRect.bottom<objRect.top||playerRect.top>objRect.bottom)){
+health-=20;healthInner.style.width=health+'%';obj.remove();clearInterval(interval);
+if(health<=0) endGame(false);
+}
+if(top>gameArea.offsetHeight){obj.remove();clearInterval(interval);}
+},30);
+}
+
+function endGame(win=false){gameActive=false;overlay.style.display='flex';overlayMessage.textContent=win?'Kazandınız 🎉':'Kaybettiniz 😢';fallingObjects.forEach(obj=>obj.remove());fallingObjects=[];}
+
+function startTimer(){
+let interval=setInterval(()=>{
+if(!gameActive){clearInterval(interval);return;}
+time--;timeDisplay.textContent=time;
+if(time<=0||health<=0){endGame(false);clearInterval(interval);}
+},1000);
 }
 
 startBtn.addEventListener('click',startGame);
@@ -282,4 +244,3 @@ restartBtn.addEventListener('click',restartGame);
 
 </body>
 </html>
-
