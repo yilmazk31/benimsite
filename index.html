@@ -105,20 +105,7 @@ h1,h2,h3 { color:#0d6efd; }
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// Firebase config → kendi bilgilerini buraya koy
-const firebaseConfig = {
-  apiKey: "BURAYA_API_KEY",
-  authDomain: "BURAYA_AUTH_DOMAIN",
-  databaseURL: "BURAYA_DATABASE_URL",
-  projectId: "BURAYA_PROJECT_ID",
-  storageBucket: "BURAYA_STORAGE_BUCKET",
-  messagingSenderId: "BURAYA_SENDER_ID",
-  appId: "BURAYA_APP_ID"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// Temel değişkenler
+// --- Temel değişkenler ve kontrol ---
 let player=document.getElementById('player');
 let gameArea=document.getElementById('game-area');
 let scoreDisplay=document.getElementById('score-display');
@@ -135,16 +122,136 @@ let gameOverSound=document.getElementById('gameover-sound');
 let bgMusic=document.getElementById('bg-music');
 
 let score=0,money=100,time=0,health=100,gameActive=false,fallingObjects=[],difficultyMultiplier=1;
-let playerName="",selectedCostume="lime";
+let playerName="", selectedCostume="lime", playerPos=175;
 
-// Oyuncu adı al
+// Firebase yapılandırma
+const firebaseConfig = {
+  apiKey: "BURAYA_API_KEY",
+  authDomain: "BURAYA_AUTH_DOMAIN",
+  databaseURL: "BURAYA_DATABASE_URL",
+  projectId: "BURAYA_PROJECT_ID",
+  storageBucket: "BURAYA_STORAGE_BUCKET",
+  messagingSenderId: "BURAYA_SENDER_ID",
+  appId: "BURAYA_APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// --- Oyuncu adı ---
 document.getElementById('save-name-btn').addEventListener('click',()=>{
   let val=document.getElementById('player-name-input').value.trim();
   if(val){ playerName=val; document.getElementById('name-screen').style.display='none'; }
 });
 
-// Buraya oyun mantığı, düşman ve bonus yaratma, skor güncelleme ve Firebase global skor eklemesi eklenecek
+// --- Shop ---
+function buyItem(name,cost,color){
+  if(money>=cost){
+    money-=cost; selectedCostume=color; player.style.backgroundColor=color;
+    moneyDisplay.textContent=money;
+  }
+}
+
+// --- Kontroller ---
+let keys={};
+document.addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; });
+document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
+
+document.getElementById('left-btn').addEventListener('touchstart',()=>{ keys['a']=true; });
+document.getElementById('left-btn').addEventListener('touchend',()=>{ keys['a']=false; });
+document.getElementById('right-btn').addEventListener('touchstart',()=>{ keys['d']=true; });
+document.getElementById('right-btn').addEventListener('touchend',()=>{ keys['d']=false; });
+
+// --- Oyun Başlat/Durdur/Yeniden Başlat ---
+startBtn.addEventListener('click',()=>{ if(!gameActive){ startGame(); } });
+stopBtn.addEventListener('click',()=>{ gameActive=false; bgMusic.pause(); });
+restartBtn.addEventListener('click',()=>{ overlay.style.display='none'; startGame(); });
+
+function startGame(){
+  score=0; money=100; time=0; health=100; difficultyMultiplier=1; gameActive=true; fallingObjects=[]; playerPos=175;
+  player.style.left=playerPos+'px';
+  scoreDisplay.textContent=score; moneyDisplay.textContent=money; timeDisplay.textContent=time;
+  healthInner.style.width='100%';
+  overlay.style.display='none';
+  bgMusic.currentTime=0; bgMusic.play();
+  requestAnimationFrame(gameLoop);
+}
+
+// --- Oyun Mantığı ---
+function spawnObject(){
+  let objType=Math.random();
+  let obj=document.createElement('div');
+  obj.classList.add('falling');
+  obj.style.left=Math.random()*370+'px';
+  obj.style.top='0px';
+  if(objType<0.6) obj.classList.add('coin');
+  else if(objType<0.9) obj.classList.add('enemy');
+  else obj.classList.add('bonus');
+  gameArea.appendChild(obj);
+  fallingObjects.push(obj);
+}
+
+// --- Efektler ---
+function createEffect(type,x,y){
+  let effect=document.createElement('div');
+  effect.style.position='absolute'; effect.style.left=x+'px'; effect.style.top=y+'px';
+  effect.style.width='30px'; effect.style.height='30px'; effect.style.borderRadius='50%'; effect.style.pointerEvents='none';
+  if(type==='coin'){ effect.style.background='radial-gradient(circle, gold, yellow)'; effect.style.boxShadow='0 0 15px gold'; }
+  if(type==='enemy'){ effect.style.background='radial-gradient(circle, red, darkred)'; effect.style.boxShadow='0 0 15px red'; }
+  if(type==='bonus'){ effect.style.background='radial-gradient(circle, cyan, deepskyblue)'; effect.style.boxShadow='0 0 15px cyan'; }
+  gameArea.appendChild(effect);
+  let pos=0; let anim=setInterval(()=>{ effect.style.top=parseInt(effect.style.top)-1+'px'; effect.style.opacity=1-pos/20; pos++; if(pos>20){ clearInterval(anim); effect.remove(); } },16);
+}
+
+function gameLoop(){
+  if(!gameActive) return;
+  time++; timeDisplay.textContent=time;
+
+  if(keys['a'] && playerPos>0) playerPos-=5;
+  if(keys['d'] && playerPos<350) playerPos+=5;
+  player.style.left=playerPos+'px';
+
+  if(Math.random()<0.02*difficultyMultiplier) spawnObject();
+
+  for(let i=fallingObjects.length-1;i>=0;i--){
+    let obj=fallingObjects[i];
+    obj.style.top=parseInt(obj.style.top)+2*difficultyMultiplier+'px';
+    if(parseInt(obj.style.top)+30>=350 && parseInt(obj.style.left)+30>playerPos && parseInt(obj.style.left)<playerPos+50){
+      if(obj.classList.contains('coin')){ score+=10; money+=5; scoreDisplay.textContent=score; moneyDisplay.textContent=money; createEffect('coin',playerPos,340); }
+      if(obj.classList.contains('enemy')){ health-=20; hitSound.play(); healthInner.style.width=health+'%'; createEffect('enemy',playerPos,340); }
+      if(obj.classList.contains('bonus')){ money+=20; score+=20; scoreDisplay.textContent=score; moneyDisplay.textContent=money; createEffect('bonus',playerPos,340); }
+      obj.remove(); fallingObjects.splice(i,1);
+    } else if(parseInt(obj.style.top)>400){ obj.remove(); fallingObjects.splice(i,1); }
+  }
+
+  if(health<=0){ endGame(); return; }
+  difficultyMultiplier+=0.0005;
+  requestAnimationFrame(gameLoop);
+}
+
+function endGame(){
+  gameActive=false;
+  overlayMessage.textContent='Kaybettiniz 😢';
+  overlay.style.display='flex';
+  gameOverSound.play();
+  bgMusic.pause();
+  saveScore();
+}
+
+// --- Firebase Global Skor ---
+function saveScore(){
+  if(!playerName) return;
+  let scoreRef=db.ref('globalScores/'+playerName);
+  scoreRef.set({score:score}).then(updateLeaderboard);
+}
+function updateLeaderboard(){
+  db.ref('globalScores').orderByChild('score').limitToLast(10).once('value',snapshot=>{
+    let table=document.getElementById('leaderboard-table'); table.innerHTML='<tr><th>Sıra</th><th>İsim</th><th>Skor</th></tr>';
+    let data=[]; snapshot.forEach(child=>{ data.push({name:child.key, score:child.val().score}); });
+    data.sort((a,b)=>b.score-a.score);
+    data.forEach((d,i)=>{ let row=table.insertRow(); row.insertCell(0).textContent=i+1; row.insertCell(1).textContent=d.name; row.insertCell(2).textContent=d.score; });
+  });
+}
 </script>
+
 </body>
 </html>
-
