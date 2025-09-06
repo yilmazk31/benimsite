@@ -13,20 +13,49 @@
       color: #333;
     }
 
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: #2575fc;
+      color: #fff;
+      padding: 15px 0;
+      text-align: center;
+      z-index: 100;
+    }
+
+    nav a {
+      margin: 0 20px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
     header {
       background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
       color: #fff;
       text-align: center;
-      padding: 80px 20px;
+      padding: 150px 20px 100px 20px;
     }
 
     header h1 {
       margin: 0;
       font-size: 3em;
+      animation: fadeIn 2s ease-in-out;
     }
 
     header p {
       font-size: 1.2em;
+      margin-top: 10px;
+    }
+
+    @keyframes fadeIn {
+      from {opacity:0;}
+      to {opacity:1;}
     }
 
     section {
@@ -56,6 +85,12 @@
       width: 300px;
       box-shadow: 0 5px 15px rgba(0,0,0,0.1);
       text-align: center;
+      transition: 0.3s;
+    }
+
+    .project:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     }
 
     .project img {
@@ -79,7 +114,7 @@
       padding: 20px;
     }
 
-    .contact-btn {
+    .contact-btn, button {
       display: inline-block;
       padding: 10px 20px;
       background-color: #ff6600;
@@ -87,24 +122,47 @@
       text-decoration: none;
       border-radius: 5px;
       margin-top: 15px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
       transition: 0.3s;
     }
 
-    .contact-btn:hover {
+    .contact-btn:hover, button:hover {
       background-color: #e05500;
+    }
+
+    form input, form textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+
+    @media screen and (max-width: 768px) {
+      .projects { flex-direction: column; align-items: center; }
+      header h1 { font-size: 2em; }
     }
   </style>
 </head>
 <body>
 
+  <nav>
+    <a href="#about">Hakkımda</a>
+    <a href="#portfolio">Projelerim</a>
+    <a href="#contact">İletişim</a>
+  </nav>
+
   <header>
     <h1>Merhaba, Ben Yılmaz Karabulut!</h1>
-    <p>Web geliştirici & Tasarımcı</p>
+    <p>10. sınıf öğrencisi, 15 yaşındayım ve 4 Ocak'ta 16 olacağım</p>
   </header>
 
   <section id="about">
     <h2>Hakkımda</h2>
-    <p>Ben web geliştirme ve tasarım ile ilgileniyorum. HTML, CSS ve JavaScript kullanarak modern ve şık web siteleri tasarlıyorum.</p>
+    <p>Web geliştirme ve tasarım ile ilgileniyorum. HTML, CSS ve JavaScript kullanarak modern ve şık web siteleri tasarlıyorum. 10. sınıf öğrencisiyim ve teknolojiye büyük ilgim var.</p>
   </section>
 
   <section id="portfolio">
@@ -130,8 +188,12 @@
 
   <section id="contact">
     <h2>İletişim</h2>
-    <p>Bana ulaşmak için aşağıdaki butona tıklayabilirsin:</p>
-    <a href="mailto:ornek@email.com" class="contact-btn">Email Gönder</a>
+    <form action="mailto:ornek@email.com" method="post" enctype="text/plain">
+      <input type="text" name="name" placeholder="Adınız" required>
+      <input type="email" name="email" placeholder="Email" required>
+      <textarea name="message" placeholder="Mesajınız" required></textarea>
+      <button type="submit">Gönder</button>
+    </form>
   </section>
 
   <footer>
