@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Yılmaz Karabulut - Oyun Geliştirici</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -29,7 +29,7 @@ h2{text-align:center;margin-bottom:40px;font-size:2em;color:#0d6efd;}
 form input, form textarea{width:100%;padding:10px;margin-bottom:15px;border-radius:5px;border:1px solid #ccc;font-size:1em;}
 footer{background:#0d6efd;color:#fff;text-align:center;padding:20px;}
 #game-area{position:relative;width:400px;height:400px;background:#111;border:2px solid #0d6efd;margin:20px auto;overflow:hidden;border-radius:10px;}
-#player{position:absolute;width:50px;height:50px;background:red;bottom:0;left:175px;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:24px;transition:0.2s;}
+#player{position:absolute;width:50px;height:50px;background:red;bottom:0;left:175px;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:24px;transition:none;}
 #score-display,#level-display,#time-display,#money-display{font-size:1.5em; font-weight:bold; padding:5px 10px; background:#222; border-radius:10px; margin:5px;}
 #game-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:2em;border-radius:5px;display:none;}
 #game-overlay button{margin-top:20px;padding:10px 20px;background:#0d6efd;color:#fff;border:none;border-radius:5px;cursor:pointer;}
@@ -151,6 +151,33 @@ const stopBtn=document.getElementById('stop-btn');
 const restartBtn=document.getElementById('restart-btn');
 
 let score=0,level=1,time=30,gameActive=false,fallingObjects=[],playerSpeed=10;
+let leftPressed=false, rightPressed=false;
+let currentCostume='red';
+
+function applyCostume(){
+  if(currentCostume=='mavi kostüm') player.style.background='blue';
+  else if(currentCostume=='yeşil kostüm') player.style.background='green';
+  else if(currentCostume=='turuncu kostüm') player.style.background='orange';
+  else if(currentCostume=='mor kostüm') player.style.background='purple';
+  else if(currentCostume=='şapka') player.style.background='red'; 
+  else player.style.background='red';
+}
+
+function buyCostume(item){
+  const cost = parseInt(item.dataset.cost);
+  if(cost<=100){ 
+    item.classList.remove('locked'); 
+    currentCostume = item.textContent.split('-')[0].trim().toLowerCase();
+    applyCostume();
+  } else { 
+    alert('Yeterli paranız yok!'); 
+  }
+}
+
+function selectCostume(name){
+  currentCostume = name;
+  applyCostume();
+}
 
 function startGame(){
   gameActive=true;
@@ -161,6 +188,7 @@ function startGame(){
   timeDisplay.textContent=time;
   fallingObjects=[];
   spawnFallingObject();
+  requestAnimationFrame(movePlayer);
 }
 
 function stopGame(){
@@ -174,32 +202,34 @@ function restartGame(){
   startGame();
 }
 
-// Bilgisayar ok tuşları
+// Bilgisayar
 document.addEventListener('keydown', e=>{
-  if(!gameActive) return;
-  let left=parseInt(player.style.left || 175);
-  if(e.key==='ArrowLeft'){left-=playerSpeed;}
-  if(e.key==='ArrowRight'){left+=playerSpeed;}
-  if(left<0) left=0;
-  if(left>gameArea.offsetWidth-50) left=gameArea.offsetWidth-50;
-  player.style.left=left+'px';
+  if(e.key==='ArrowLeft') leftPressed=true;
+  if(e.key==='ArrowRight') rightPressed=true;
+});
+document.addEventListener('keyup', e=>{
+  if(e.key==='ArrowLeft') leftPressed=false;
+  if(e.key==='ArrowRight') rightPressed=false;
 });
 
-// Mobil butonlar
+// Mobil
 const leftBtn=document.getElementById('left-btn');
 const rightBtn=document.getElementById('right-btn');
 
-function moveLeft(){ 
-  let left=parseInt(player.style.left || 175);
-  left-=playerSpeed; if(left<0) left=0; player.style.left=left+'px';
-}
-function moveRight(){
-  let left=parseInt(player.style.left || 175);
-  left+=playerSpeed; if(left>gameArea.offsetWidth-50) left=gameArea.offsetWidth-50; player.style.left=left+'px';
-}
+leftBtn.addEventListener('touchstart',()=>{leftPressed=true;});
+leftBtn.addEventListener('touchend',()=>{leftPressed=false;});
+rightBtn.addEventListener('touchstart',()=>{rightPressed=true;});
+rightBtn.addEventListener('touchend',()=>{rightPressed=false;});
 
-leftBtn.addEventListener('touchstart',()=>{if(gameActive) moveLeft();});
-rightBtn.addEventListener('touchstart',()=>{if(gameActive) moveRight();});
+// Hareket loop
+function movePlayer(){
+  if(!gameActive) return;
+  let left = parseInt(player.style.left || 175);
+  if(leftPressed){ left -= playerSpeed; if(left<0) left=0;}
+  if(rightPressed){ left += playerSpeed; if(left>gameArea.offsetWidth-50) left=gameArea.offsetWidth-50;}
+  player.style.left=left+'px';
+  requestAnimationFrame(movePlayer);
+}
 
 // Falling Objects
 function spawnFallingObject(){
@@ -239,15 +269,6 @@ function moveFallingObject(obj){
   },30);
 }
 
-// Shop
-function buyCostume(item){
-  const cost=parseInt(item.dataset.cost);
-  if(cost<=100){ item.classList.remove('locked'); alert(item.textContent+' seçildi!'); }
-  else { alert('Yeterli paranız yok!'); }
-}
-function selectCostume(name){alert(name+' seçildi!');}
-
-// Game Over
 function endGame(win=false){
   gameActive=false;
   overlay.style.display='flex';
@@ -261,3 +282,4 @@ restartBtn.addEventListener('click',restartGame);
 
 </body>
 </html>
+
