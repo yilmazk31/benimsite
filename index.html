@@ -10,13 +10,18 @@ h1,h2,h3 { color:#0d6efd; }
 #name-screen {
   position:fixed;
   top:0; left:0; width:100%; height:100%;
-  background:#000 url('') center/cover no-repeat; /* Arka plan resmini siyah yaptık */
+  background:#000;
   display:flex; flex-direction:column; justify-content:center; align-items:center;
   z-index:500;
 }
 #name-screen h1 { font-size:3em; margin-bottom:20px; }
 #name-screen input { padding:10px; font-size:16px; margin-top:10px; border-radius:5px; border:none; }
 #name-screen button { margin-top:10px; padding:10px 20px; background:#0d6efd; color:#fff; border:none; border-radius:5px; cursor:pointer; font-size:16px; }
+
+#info-box {
+  background:#0d6efd; color:#fff; padding:10px; border-radius:10px; width:90%; max-width:400px; margin:10px auto; text-align:left;
+}
+
 #game-area { position:relative; width:90%; max-width:400px; height:400px; background:#111; border:2px solid #0d6efd; margin:20px auto; overflow:hidden; border-radius:10px; }
 #player { position:absolute; bottom:10px; left:175px; width:50px; height:50px; border-radius:50%; transition:left 0.05s linear; background:lime; display:flex; justify-content:center; align-items:center; font-size:24px; }
 .falling { position:absolute; top:0; width:30px; height:30px; border-radius:50%; }
@@ -31,7 +36,7 @@ h1,h2,h3 { color:#0d6efd; }
 .mobile-btn { width:60px; height:60px; font-size:24px; border:none; border-radius:50%; background:#0d6efd; color:#fff; cursor:pointer; }
 #shop { margin:20px auto; width:90%; max-width:400px; background:#222; padding:10px; border-radius:10px; }
 .shop-item { display:inline-block; margin:5px; padding:5px 10px; background:#0d6efd; border-radius:5px; cursor:pointer; }
-#info { margin:20px; padding:10px; background:#111; border:1px solid #0d6efd; border-radius:10px; text-align:left; }
+
 #global-table { margin:10px auto; width:90%; max-width:400px; border-collapse:collapse; }
 #global-table th, #global-table td { border:1px solid #0d6efd; padding:5px; color:#fff; }
 </style>
@@ -44,7 +49,15 @@ h1,h2,h3 { color:#0d6efd; }
   <button id="start-btn">Başla 🚀</button>
 </div>
 
-<h1>Yılmaz Karabulut Oyun</h1>
+<div id="info-box">
+<h3>Benim Bilgilerim</h3>
+<p>Yaş: 15</p>
+<p>Okul: Akhisar Koleji Fen Lisesi</p>
+<p>Şehir: Manisa, Akhisar</p>
+<p>Sınıf: 10. sınıf</p>
+<p>Hobiler: Oyun oynamak, gezmek</p>
+<p>Instagram: <a href="https://www.instagram.com/ykk388?igsh=bm5pM3lub3liNzl2&utm_source=qr" target="_blank">@ykk388</a></p>
+</div>
 
 <div id="game-area">
   <div id="player"></div>
@@ -69,12 +82,6 @@ h1,h2,h3 { color:#0d6efd; }
   <div class="shop-item" data-cost="150" data-type="face">Yüz İfadesi - 150</div>
 </div>
 
-<div id="info">
-  <h3>Oyun Bilgisi</h3>
-  <p>PC: A/D tuşları, Mobil: ◀ ▶ tuşları</p>
-  <p>Coin toplayın, düşmanlardan kaçın, bonusları ve kalpleri yakalayın.</p>
-</div>
-
 <h3>İletişim</h3>
 <p>Yardım için: <a href="mailto:yilmazkarabulut@akhisarkoleji.com">yilmazkarabulut@akhisarkoleji.com</a></p>
 
@@ -89,11 +96,38 @@ h1,h2,h3 { color:#0d6efd; }
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
 
+// Firebase config (senin Firebase bilgilerini buraya ekle)
+const firebaseConfig = {
+  apiKey: "BURAYA",
+  authDomain: "BURAYA",
+  databaseURL: "BURAYA",
+  projectId: "BURAYA",
+  storageBucket: "BURAYA",
+  messagingSenderId: "BURAYA",
+  appId: "BURAYA"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 const nameScreen = document.getElementById('name-screen');
 const playerNameInput = document.getElementById('player-name-input');
 const startBtn = document.getElementById('start-btn');
+const restartBtn = document.getElementById('restart-btn');
+const gameOverlay = document.getElementById('game-overlay');
+const overlayMessage = document.getElementById('overlay-message');
+const player = document.getElementById('player');
+const gameArea = document.getElementById('game-area');
+const scoreDisplay = document.getElementById('score-display');
+const moneyDisplay = document.getElementById('money-display');
+const timeDisplay = document.getElementById('time-display');
+const healthInner = document.getElementById('health-inner');
+const shopItems = document.querySelectorAll('.shop-item');
+const globalTable = document.getElementById('global-table');
 
-// Başla butonu
+let score=0, money=100, time=0, health=100, gameActive=false, playerPos=175, keys={}, selectedHat=null, selectedOutfit=null, selectedFace=null;
+let fallingObjects=[];
+
+// Başla tuşu
 startBtn.addEventListener('click',()=>{
   const name = playerNameInput.value.trim();
   if(!name){
@@ -102,18 +136,75 @@ startBtn.addEventListener('click',()=>{
   }
   window.playerName = name;
   nameScreen.style.display='none';
-  startGame(); // eski oyun başlatma fonksiyonun
+  loadPlayerData(window.playerName, startGame);
 });
 
-// Eski startGame fonksiyonun burada çalışacak
-function startGame(){
-  console.log('Oyun başladı!', window.playerName);
-  // Mevcut oyun kodlarını buraya ekle
-  alert('Oyun başlatıldı!'); // test için
+restartBtn.addEventListener('click',()=>{
+  gameOverlay.style.display='none';
+  startGame();
+});
+
+// Kontroller
+document.addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; });
+document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
+document.getElementById('left-btn').addEventListener('touchstart',()=>{ keys['a']=true; });
+document.getElementById('left-btn').addEventListener('touchend',()=>{ keys['a']=false; });
+document.getElementById('right-btn').addEventListener('touchstart',()=>{ keys['d']=true; });
+document.getElementById('right-btn').addEventListener('touchend',()=>{ keys['d']=false; });
+
+// Dükkan
+shopItems.forEach(item=>{
+  item.addEventListener('click',()=>{
+    const cost=parseInt(item.dataset.cost);
+    const type=item.dataset.type;
+    if(money>=cost){
+      money-=cost;
+      if(type==='hat') selectedHat='🎩';
+      if(type==='outfit') selectedOutfit='👕';
+      if(type==='face') selectedFace='😎';
+      moneyDisplay.textContent=money;
+      savePlayerData(window.playerName);
+    }
+  });
+});
+
+// Firebase yükleme
+function loadPlayerData(name, callback){
+  db.ref('players/'+name).once('value',snapshot=>{
+    const data=snapshot.val();
+    if(data){
+      if(data.selectedHat) selectedHat=data.selectedHat;
+      if(data.selectedOutfit) selectedOutfit=data.selectedOutfit;
+      if(data.selectedFace) selectedFace=data.selectedFace;
+      money=data.money||100;
+    }
+    callback();
+  });
 }
 
-});
-</script>
+// Firebase kaydetme
+function savePlayerData(name){
+  db.ref('players/'+name).set({
+    selectedHat, selectedOutfit, selectedFace, money
+  });
+}
 
-</body>
-</html>
+// Başlat
+function startGame(){
+  score=0; time=0; health=100; gameActive=true; playerPos=175;
+  player.style.left=playerPos+'px';
+  player.textContent = (selectedHat||'') + (selectedOutfit||'') + (selectedFace||'');
+  scoreDisplay.textContent=score; moneyDisplay.textContent=money; timeDisplay.textContent=time;
+  healthInner.style.width='100%';
+  fallingObjects.forEach(o=>o.remove()); fallingObjects=[];
+  requestAnimationFrame(gameLoop);
+}
+
+// Objeler
+function spawnObject(){
+  const obj=document.createElement('div');
+  obj.classList.add('falling');
+  obj.style.left=Math.random()*370+'px';
+  obj.style.top='0px';
+  const r=Math.random();
+  if(r
