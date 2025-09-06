@@ -5,10 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Yılmaz Karabulut Oyun</title>
 <style>
-body { margin:0; font-family:Arial,sans-serif; background:#000; color:#fff; text-align:center; }
+body { margin:0; font-family:Arial,sans-serif; background:#000; color:#fff; text-align:center; overflow-x:hidden; }
 h1,h2,h3 { color:#0d6efd; }
 #name-screen { position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:500; }
 #name-screen input { padding:10px; font-size:16px; margin-top:10px; }
+#start-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); color:#fff; display:flex; flex-direction:column; justify-content:center; align-items:center; font-size:2em; z-index:600; cursor:pointer; }
+#start-overlay h2 { color:#fff; margin-bottom:20px; }
 #game-area { position:relative; width:90%; max-width:400px; height:400px; background:#111; border:2px solid #0d6efd; margin:20px auto; overflow:hidden; border-radius:10px; }
 #player { position:absolute; bottom:10px; left:175px; width:50px; height:50px; border-radius:50%; transition:left 0.05s linear; background:lime; display:flex; justify-content:center; align-items:center; font-size:24px; }
 .falling { position:absolute; top:0; width:30px; height:30px; border-radius:50%; }
@@ -26,8 +28,6 @@ h1,h2,h3 { color:#0d6efd; }
 #info { margin:20px; padding:10px; background:#111; border:1px solid #0d6efd; border-radius:10px; text-align:left; }
 #global-table { margin:10px auto; width:90%; max-width:400px; border-collapse:collapse; }
 #global-table th, #global-table td { border:1px solid #0d6efd; padding:5px; color:#fff; }
-#start-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); color:#fff; display:flex; flex-direction:column; justify-content:center; align-items:center; font-size:2em; z-index:600; cursor:pointer; }
-#start-overlay h2 { color:#fff; margin-bottom:20px; }
 </style>
 </head>
 <body>
@@ -39,6 +39,7 @@ h1,h2,h3 { color:#0d6efd; }
 
 <div id="start-overlay">
   <h2>🎮 Başlamak için tıklayın / dokunun</h2>
+  <button id="start-btn" style="padding:10px 20px; font-size:18px; cursor:pointer;">Başla</button>
 </div>
 
 <h1>Yılmaz Karabulut Oyun</h1>
@@ -85,13 +86,13 @@ h1,h2,h3 { color:#0d6efd; }
 
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
-// --- Firebase config ---
 const firebaseConfig = { apiKey:"BURAYA", authDomain:"BURAYA", databaseURL:"BURAYA", projectId:"BURAYA", storageBucket:"BURAYA", messagingSenderId:"BURAYA", appId:"BURAYA" };
 firebase.initializeApp(firebaseConfig);
 const db=firebase.database();
 
-const nameScreen=document.getElementById('name-screen');
 const playerNameInput=document.getElementById('player-name-input');
+const startBtn=document.getElementById('start-btn');
+const startOverlay=document.getElementById('start-overlay');
 const restartBtn=document.getElementById('restart-btn');
 const gameOverlay=document.getElementById('game-overlay');
 const overlayMessage=document.getElementById('overlay-message');
@@ -103,13 +104,22 @@ const timeDisplay=document.getElementById('time-display');
 const healthInner=document.getElementById('health-inner');
 const shopItems=document.querySelectorAll('.shop-item');
 const globalTable=document.getElementById('global-table');
-const startOverlay=document.getElementById('start-overlay');
 
-let score=0, money=100, time=0, health=100, gameActive=false, playerPos=175, keys={}, selectedHat=null, selectedOutfit=null, selectedFace=null;
+let score=0,money=100,time=0,health=100,gameActive=false,playerPos=175,keys={},selectedHat=null,selectedOutfit=null,selectedFace=null;
 let fallingObjects=[];
 
-// --- Başlat ---
 function updatePlayerAppearance(){ player.textContent=(selectedHat||'')+(selectedOutfit||'')+(selectedFace||''); }
+
+function loadPlayerData(name,callback){
+  db.ref('players/'+name).once('value',snapshot=>{
+    const data=snapshot.val();
+    if(data){ selectedHat=data.selectedHat||null; selectedOutfit=data.selectedOutfit||null; selectedFace=data.selectedFace||null; money=data.money||100; }
+    updatePlayerAppearance(); callback();
+  });
+}
+
+function savePlayerData(name){ db.ref('players/'+name).set({selectedHat,selectedOutfit,selectedFace,money}); }
+
 function startGame(){
   score=0; time=0; health=100; gameActive=true; playerPos=175;
   player.style.left=playerPos+'px';
@@ -120,21 +130,14 @@ function startGame(){
   startOverlay.style.display='none';
 }
 
-// --- Tıklama ile başlat ---
-startOverlay.addEventListener('click',()=>{
-  let val=playerNameInput.value.trim();
-  window.playerName=val?val:'Oyuncu';
-  nameScreen.style.display='none';
+startBtn.addEventListener('click',e=>{
+  e.preventDefault();
+  window.playerName=playerNameInput.value.trim()||'Oyuncu';
   loadPlayerData(window.playerName,startGame);
 });
 
-// --- Restart ---
-restartBtn.addEventListener('click',()=>{
-  gameOverlay.style.display='none';
-  startGame();
-});
+restartBtn.addEventListener('click',()=>{ gameOverlay.style.display='none'; startGame(); });
 
-// --- Kontroller ---
 document.addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; });
 document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
 document.getElementById('left-btn').addEventListener('touchstart',()=>{ keys['a']=true; });
@@ -142,7 +145,6 @@ document.getElementById('left-btn').addEventListener('touchend',()=>{ keys['a']=
 document.getElementById('right-btn').addEventListener('touchstart',()=>{ keys['d']=true; });
 document.getElementById('right-btn').addEventListener('touchend',()=>{ keys['d']=false; });
 
-// --- Shop ---
 shopItems.forEach(item=>{
   item.addEventListener('click',()=>{
     const cost=parseInt(item.dataset.cost), type=item.dataset.type;
@@ -155,23 +157,11 @@ shopItems.forEach(item=>{
   });
 });
 
-// --- Firebase yükleme ---
-function loadPlayerData(name,callback){
-  db.ref('players/'+name).once('value',snapshot=>{
-    const data=snapshot.val();
-    if(data){ selectedHat=data.selectedHat||null; selectedOutfit=data.selectedOutfit||null; selectedFace=data.selectedFace||null; money=data.money||100; }
-    updatePlayerAppearance(); callback();
-  });
-}
-function savePlayerData(name){ db.ref('players/'+name).set({selectedHat,selectedOutfit,selectedFace,money}); }
-
-// --- Objeler ---
 function spawnObject(){ const obj=document.createElement('div'); obj.classList.add('falling'); obj.style.left=Math.random()*370+'px'; obj.style.top='0px';
   const r=Math.random(); if(r<0.55)obj.classList.add('coin'); else if(r<0.85)obj.classList.add('enemy'); else if(r<0.95)obj.classList.add('bonus'); else obj.classList.add('heart');
   gameArea.appendChild(obj); fallingObjects.push(obj);
 }
 
-// --- Oyun döngüsü ---
 function gameLoop(){ if(!gameActive)return;
   time++; timeDisplay.textContent=time;
   if(keys['a']&&playerPos>0)playerPos-=5;
@@ -194,7 +184,6 @@ function gameLoop(){ if(!gameActive)return;
   if(gameActive) requestAnimationFrame(gameLoop);
 }
 
-// --- Global skor ---
 function updateGlobalScore(playerName,score){
   db.ref('scores/'+playerName).set(score);
   db.ref('scores').orderByValue().limitToLast(10).once('value',snapshot=>{
