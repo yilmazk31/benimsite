@@ -13,6 +13,7 @@ header{text-align:center;padding:150px 20px 100px 20px;position:relative;overflo
 header::after{content:"";background:url('https://cdn.pixabay.com/photo/2017/05/10/20/30/video-game-2306740_1280.jpg') center/cover no-repeat;opacity:0.2;position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;}
 section{padding:60px 20px;max-width:1000px;margin:0 auto;}
 #about{background:#0d6efd;color:#fff;padding:20px;margin-bottom:40px;border-radius:10px;}
+#mini-game-container{display:flex;justify-content:center;flex-wrap:wrap;gap:20px;}
 #game-area{position:relative;width:90%;max-width:400px;height:400px;background:#111;border:2px solid #0d6efd;margin:20px auto;overflow:hidden;border-radius:10px;}
 #player{position:absolute;width:50px;height:50px;background:red;bottom:0;left:175px;border-radius:5px;display:flex;justify-content:center;align-items:center;font-size:24px;transition:none;}
 #game-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:2em;border-radius:5px;display:none;}
@@ -22,11 +23,13 @@ section{padding:60px 20px;max-width:1000px;margin:0 auto;}
 .shop-item.locked{background:#555;cursor:not-allowed;}
 #control-buttons{display:flex;justify-content:center;gap:10px;margin-top:10px;}
 .control-btn{padding:8px 15px;background:#ff6600;color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:bold;}
-#mobile-controls{display:none;text-align:center;margin-top:10px;}
+#mobile-controls{display:none;text-align:center;margin-top:10px;position:fixed;bottom:10px;width:100%;justify-content:center;gap:10px;}
 .health-bar{width:100%;background:#555;height:20px;border-radius:10px;margin-bottom:10px;overflow:hidden;}
 .health-inner{width:100%;height:100%;background:red;}
 .scoreboard{display:flex;justify-content:space-between;align-items:center;max-width:400px;margin:10px auto;}
-@media(max-width:500px){#game-area{height:300px;}#player{width:40px;height:40px;}#mobile-controls{display:flex;justify-content:center;gap:10px;}}
+#players-table{color:#fff;border:2px solid #0d6efd;border-collapse:collapse;}
+#players-table th,#players-table td{border:1px solid #0d6efd;padding:5px;text-align:center;}
+@media(max-width:500px){#game-area{height:300px;}#player{width:40px;height:40px;}#mobile-controls{display:flex;}}
 </style>
 </head>
 <body>
@@ -61,10 +64,18 @@ section{padding:60px 20px;max-width:1000px;margin:0 auto;}
 <h2>Mini Oyun</h2>
 <div class="scoreboard">
 <div>Oyuncu: Yılmaz Karabulut</div>
-<div>Dünya Sıralaması: 12</div>
+<div>Dünya Sıralaması:</div>
+</div>
+<div id="mini-game-container">
+<div id="game-area">
+<div id="player"></div>
+<div id="game-overlay">
+<div id="overlay-message">Kaybettiniz 😢</div>
+<button id="restart-btn">Yeniden Başlat</button>
 </div>
 <div class="health-bar"><div id="health-inner" class="health-inner"></div></div>
-<div style="text-align:center;margin-bottom:10px;" id="control-buttons">
+<p>Puan: <span id="score-display">0</span> | Para: <span id="money-display">100</span> | Kalan Süre: <span id="time-display">30</span>s</p>
+<div id="control-buttons">
 <button id="start-btn" class="control-btn">Oyunu Başlat</button>
 <button id="stop-btn" class="control-btn">Oyunu Durdur</button>
 </div>
@@ -72,12 +83,16 @@ section{padding:60px 20px;max-width:1000px;margin:0 auto;}
 <button id="left-btn" class="control-btn">⬅️</button>
 <button id="right-btn" class="control-btn">➡️</button>
 </div>
-<p>Puan: <span id="score-display">0</span> | Para: <span id="money-display">100</span> | Kalan Süre: <span id="time-display">30</span>s</p>
-<div id="game-area">
-<div id="player"></div>
-<div id="game-overlay">
-<div id="overlay-message">Kaybettiniz 😢</div>
-<button id="restart-btn">Yeniden Başlat</button>
+</div>
+
+<div>
+<h3>Oyuncular Tablosu</h3>
+<table id="players-table">
+<tr><th>Sıra</th><th>İsim</th><th>Puan</th></tr>
+<tr><td>1</td><td>Ali</td><td>120</td></tr>
+<tr><td>2</td><td>Veli</td><td>100</td></tr>
+<tr><td>3</td><td>Yılmaz Karabulut</td><td>0</td></tr>
+</table>
 </div>
 </div>
 
@@ -119,7 +134,7 @@ let leftPressed=false,rightPressed=false,currentCostume='red';
 
 // Sesler
 const coinSound=new Audio('https://freesound.org/data/previews/256/256113_3263906-lq.mp3');
-const hitSound=new Audio('https://freesound.org/data/previews/109/109662_945474-lq.mp3');
+const hitSound=new Audio('https://www.soundjay.com/button/beep-07.mp3'); // örnek hasar sesi
 const gameOverSound=new Audio('https://freesound.org/data/previews/331/331912_3248244-lq.mp3');
 
 // Kostüm fonksiyonları
@@ -252,3 +267,5 @@ restartBtn.addEventListener('click',restartGame);
 
 </body>
 </html>
+
+
