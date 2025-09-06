@@ -6,21 +6,22 @@
 <title>Yılmaz Karabulut - Oyun Geliştirici</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* Genel Stil */
 body {margin:0; font-family:'Roboto',sans-serif; background:#1e1e1e; color:#fff; scroll-behavior:smooth; transition: background 0.5s, color 0.5s;}
 .dark-mode {background:#1e1e1e; color:#fff;}
 .light-mode {background:#f5f5f5; color:#111;}
 nav {position:fixed; top:0; width:100%; background:#0d6efd; padding:15px; text-align:center; z-index:100;}
 nav a {margin:0 20px; color:#fff; text-decoration:none; font-weight:bold; transition:0.3s;}
 nav a:hover {text-decoration:underline;}
-header {text-align:center; padding:150px 20px 100px 20px; position:relative; background:linear-gradient(135deg,#6a11cb 0%,#2575fc 100%); overflow:hidden;}
-header::after {content:""; background:url('https://cdn.pixabay.com/photo/2017/05/10/20/30/video-game-2306740_1280.jpg') center/cover no-repeat; opacity:0.2; position:absolute; top:0; left:0; width:100%; height:100%; z-index:-1; transition: transform 0.5s;}
+header {text-align:center; padding:150px 20px 100px 20px; position:relative; overflow:hidden;}
 header h1 {margin:0; font-size:3em; animation:fadeIn 2s ease-in-out;}
 header p {font-size:1.2em; margin-top:10px;}
+header::after {content:""; background:url('https://cdn.pixabay.com/photo/2017/05/10/20/30/video-game-2306740_1280.jpg') center/cover no-repeat; opacity:0.2; position:absolute; top:0; left:0; width:100%; height:100%; z-index:-1; transition: transform 0.5s;}
 @keyframes fadeIn {from{opacity:0;}to{opacity:1;}}
 section {padding:60px 20px; max-width:1000px; margin:0 auto;}
 h2 {text-align:center; margin-bottom:40px; font-size:2em; color:#0d6efd;}
 .projects,.games,.skills,.blog {display:flex; flex-wrap:wrap; justify-content:center; gap:20px;}
-.project,.game,.skill,.blog-item {background:#2c2c2c; border-radius:10px; padding:20px; width:300px; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,0.3); transition:0.3s; cursor:pointer;}
+.project,.game,.skill,.blog-item {background:#2c2c2c; border-radius:10px; padding:20px; width:300px; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,0.3); transition:0.3s; cursor:pointer; position:relative;}
 .project:hover,.game:hover,.skill:hover,.blog-item:hover {transform:translateY(-5px); box-shadow:0 10px 20px rgba(0,0,0,0.5);}
 .project img,.game img {max-width:100%; border-radius:10px;}
 .project h3,.game h3,.skill h3,.blog-item h3 {margin:15px 0 10px; color:#6a11cb;}
@@ -36,7 +37,12 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 .skill-bar {height:20px; background:#555; border-radius:10px; margin-top:10px; overflow:hidden;}
 .skill-fill {height:100%; background:#0d6efd; width:0%; border-radius:10px;}
 .toggle-mode {position:fixed; bottom:20px; right:20px; background:#ff6600; color:#fff; padding:10px 15px; border-radius:5px; border:none; cursor:pointer; font-weight:bold; z-index:300;}
+.tooltip {position:absolute; bottom:100%; left:50%; transform:translateX(-50%); background:#0d6efd; color:#fff; padding:5px 10px; border-radius:5px; font-size:0.8em; opacity:0; pointer-events:none; transition:0.3s;}
+.project:hover .tooltip,.game:hover .tooltip,.skill:hover .tooltip {opacity:1;}
 @media screen and (max-width:768px){.projects,.games,.skills,.blog,.contact-container{flex-direction:column;align-items:center}header h1{font-size:2em}}
+/* Mini Oyun Stil */
+#game-area {position:relative; width:300px; height:300px; background:#111; border:2px solid #0d6efd; margin:0 auto; overflow:hidden;}
+#star {position:absolute; width:30px; height:30px; background:yellow; border-radius:50%; cursor:pointer;}
 </style>
 </head>
 <body class="dark-mode">
@@ -47,6 +53,7 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 <a href="#games">Oyunlarım</a>
 <a href="#skills">Yetenekler</a>
 <a href="#blog">Blog</a>
+<a href="#mini-game">Mini Oyun</a>
 <a href="#contact">İletişim</a>
 </nav>
 
@@ -63,20 +70,23 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 <section id="portfolio">
 <h2>Projelerim</h2>
 <div class="projects">
-<div class="project" onclick="openModal('Proje 1: Bu ilk oyun geliştirme projem. <br><video src=\'https://www.w3schools.com/html/mov_bbb.mp4\' controls width=100%></video>')">
+<div class="project" onclick="openModal('Proje 1: Bu ilk oyun geliştirme projem.<br><video src=\'https://www.w3schools.com/html/mov_bbb.mp4\' controls width=100%></video>')">
 <img src="https://via.placeholder.com/300x200" alt="Proje 1">
 <h3>Proje 1</h3>
 <p>İlk oyun geliştirme projem</p>
+<div class="tooltip">Video ile detay</div>
 </div>
-<div class="project" onclick="openModal('Proje 2: Web tabanlı mini oyun. <br><video src=\'https://www.w3schools.com/html/mov_bbb.mp4\' controls width=100%></video>')">
+<div class="project" onclick="openModal('Proje 2: Web tabanlı mini oyun.<br><video src=\'https://www.w3schools.com/html/mov_bbb.mp4\' controls width=100%></video>')">
 <img src="https://via.placeholder.com/300x200" alt="Proje 2">
 <h3>Proje 2</h3>
 <p>Web tabanlı mini oyun</p>
+<div class="tooltip">Video ile detay</div>
 </div>
-<div class="project" onclick="openModal('Proje 3: JS ile interaktif oyun. <br><video src=\'https://www.w3schools.com/html/mov_bbb.mp4\' controls width=100%></video>')">
+<div class="project" onclick="openModal('Proje 3: JS ile interaktif oyun.<br><video src=\'https://www.w3schools.com/html/mov_bbb.mp4\' controls width=100%></video>')">
 <img src="https://via.placeholder.com/300x200" alt="Proje 3">
 <h3>Proje 3</h3>
 <p>JS ile interaktif oyun</p>
+<div class="tooltip">Video ile detay</div>
 </div>
 </div>
 </section>
@@ -88,16 +98,19 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 <a href="https://www.pubgmobile.com/tr/home.shtml" target="_blank">
 <img src="https://upload.wikimedia.org/wikipedia/en/6/6f/PUBG_cover_art.jpg" alt="PUBG"><h3>PUBG</h3>
 </a>
+<div class="tooltip">PUBG Oyunu</div>
 </div>
 <div class="game">
 <a href="https://supercell.com/en/games/brawlstars/" target="_blank">
 <img src="https://upload.wikimedia.org/wikipedia/en/8/8d/Brawl_Stars_cover.jpg" alt="Brawl Stars"><h3>Brawl Stars</h3>
 </a>
+<div class="tooltip">Brawl Stars Oyunu</div>
 </div>
 <div class="game">
 <a href="https://www.roblox.com/" target="_blank">
 <img src="https://upload.wikimedia.org/wikipedia/en/7/77/Roblox_logo_2022.svg" alt="Roblox"><h3>Roblox</h3>
 </a>
+<div class="tooltip">Roblox Oyunu</div>
 </div>
 </div>
 </section>
@@ -105,11 +118,11 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 <section id="skills">
 <h2>Yeteneklerim</h2>
 <div class="skills">
-<div class="skill"><h3>HTML</h3><div class="skill-bar"><div class="skill-fill" style="width:90%"></div></div></div>
-<div class="skill"><h3>CSS</h3><div class="skill-bar"><div class="skill-fill" style="width:85%"></div></div></div>
-<div class="skill"><h3>JavaScript</h3><div class="skill-bar"><div class="skill-fill" style="width:75%"></div></div></div>
-<div class="skill"><h3>Unity</h3><div class="skill-bar"><div class="skill-fill" style="width:60%"></div></div></div>
-<div class="skill"><h3>Roblox Studio</h3><div class="skill-bar"><div class="skill-fill" style="width:70%"></div></div></div>
+<div class="skill" title="HTML"><h3>HTML</h3><div class="skill-bar"><div class="skill-fill" style="width:90%"></div></div></div>
+<div class="skill" title="CSS"><h3>CSS</h3><div class="skill-bar"><div class="skill-fill" style="width:85%"></div></div></div>
+<div class="skill" title="JavaScript"><h3>JavaScript</h3><div class="skill-bar"><div class="skill-fill" style="width:75%"></div></div></div>
+<div class="skill" title="Unity"><h3>Unity</h3><div class="skill-bar"><div class="skill-fill" style="width:60%"></div></div></div>
+<div class="skill" title="Roblox Studio"><h3>Roblox Studio</h3><div class="skill-bar"><div class="skill-fill" style="width:70%"></div></div></div>
 </div>
 </section>
 
@@ -119,6 +132,15 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 <div class="blog-item"><h3>1 Ocak 2025</h3><p>Yeni bir oyun motorunu öğrenmeye başladım.</p></div>
 <div class="blog-item"><h3>5 Ocak 2025</h3><p>İlk mini oyunumu tamamladım ve test ettim.</p></div>
 <div class="blog-item"><h3>10 Ocak 2025</h3><p>PUBG modifikasyonları ile deneyler yaptım.</p></div>
+</div>
+</section>
+
+<!-- Mini Oyun Bölümü -->
+<section id="mini-game">
+<h2>Mini Oyun: Yıldızı Yakala!</h2>
+<p>Puan: <span id="score">0</span></p>
+<div id="game-area">
+  <div id="star"></div>
 </div>
 </section>
 
@@ -178,6 +200,28 @@ window.addEventListener('load', ()=>{
         setTimeout(()=>{ bar.style.width = width; }, 500);
     });
 });
+
+// Mini Oyun JS
+const star = document.getElementById('star');
+const gameArea = document.getElementById('game-area');
+const scoreDisplay = document.getElementById('score');
+let score = 0;
+
+function randomPosition(){
+    const x = Math.floor(Math.random() * (gameArea.clientWidth - 30));
+    const y = Math.floor(Math.random() * (gameArea.clientHeight - 30));
+    star.style.left = x + 'px';
+    star.style.top = y + 'px';
+}
+
+star.addEventListener('click', () => {
+    score++;
+    scoreDisplay.textContent = score;
+    randomPosition();
+});
+
+// Başlangıç pozisyonu
+randomPosition();
 </script>
 
 </body>
