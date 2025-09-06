@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yılmaz Karabulut - Gelişmiş Oyun Sitesi</title>
+<title>Yılmaz Karabulut - Oyun Sitesi</title>
 <style>
 body { font-family: Arial, sans-serif; background:#000; color:#fff; margin:0; padding:0; text-align:center; }
 h1,h2,h3 { color:#0d6efd; }
@@ -30,15 +30,17 @@ h1,h2,h3 { color:#0d6efd; }
 #game-container { display:flex; flex-wrap:wrap; justify-content:center; }
 #game-wrapper { flex:1; min-width:300px; }
 #game-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); color:#fff; display:flex; flex-direction:column; justify-content:center; align-items:center; font-size:2em; border-radius:10px; display:none; z-index:100; }
+#name-screen { position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:500; }
+#name-screen input { padding:10px;font-size:16px; margin-top:10px; }
+#name-screen button { margin-top:10px;padding:10px 20px;background:#0d6efd;color:#fff;border:none;border-radius:5px;cursor:pointer; }
 </style>
 </head>
 <body>
 
-<!-- Oyuncu adı girişi -->
-<div id="name-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:500;">
-  <h2 style="color:#fff;">Oyuncu Adınızı Girin</h2>
-  <input type="text" id="player-name-input" placeholder="İsminizi yazın" style="padding:10px;font-size:16px;">
-  <button id="save-name-btn" style="margin-top:10px;padding:10px 20px;background:#0d6efd;color:#fff;border:none;border-radius:5px;cursor:pointer;">Başla</button>
+<div id="name-screen">
+  <h2>Oyuncu Adınızı Girin</h2>
+  <input type="text" id="player-name-input" placeholder="İsminizi yazın">
+  <button id="save-name-btn">Başla</button>
 </div>
 
 <h1>Yılmaz Karabulut'un Gelişmiş Oyun Sitesi</h1>
@@ -55,7 +57,6 @@ h1,h2,h3 { color:#0d6efd; }
     <div class="health-bar"><div id="health-inner" class="health-inner"></div></div>
     <p>Puan: <span id="score-display">0</span> | Para: <span id="money-display">100</span> | Zaman: <span id="time-display">0</span>s</p>
     <div id="control-buttons">
-      <button id="start-btn" class="control-btn">Oyunu Başlat</button>
       <button id="stop-btn" class="control-btn">Durdur</button>
     </div>
     <div id="mobile-controls">
@@ -105,7 +106,6 @@ h1,h2,h3 { color:#0d6efd; }
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// --- Temel değişkenler ve kontrol ---
 let player=document.getElementById('player');
 let gameArea=document.getElementById('game-area');
 let scoreDisplay=document.getElementById('score-display');
@@ -114,7 +114,6 @@ let timeDisplay=document.getElementById('time-display');
 let overlay=document.getElementById('game-overlay');
 let overlayMessage=document.getElementById('overlay-message');
 let restartBtn=document.getElementById('restart-btn');
-let startBtn=document.getElementById('start-btn');
 let stopBtn=document.getElementById('stop-btn');
 let healthInner=document.getElementById('health-inner');
 let hitSound=document.getElementById('hit-sound');
@@ -124,7 +123,7 @@ let bgMusic=document.getElementById('bg-music');
 let score=0,money=100,time=0,health=100,gameActive=false,fallingObjects=[],difficultyMultiplier=1;
 let playerName="", selectedCostume="lime", playerPos=175;
 
-// Firebase yapılandırma
+// Firebase yapılandırma (isteğe bağlı doldur)
 const firebaseConfig = {
   apiKey: "BURAYA_API_KEY",
   authDomain: "BURAYA_AUTH_DOMAIN",
@@ -137,10 +136,13 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --- Oyuncu adı ---
+// --- Oyuncu adı ve oyun başlat ---
 document.getElementById('save-name-btn').addEventListener('click',()=>{
   let val=document.getElementById('player-name-input').value.trim();
-  if(val){ playerName=val; document.getElementById('name-screen').style.display='none'; }
+  if(!val) val="Oyuncu"; 
+  playerName=val;
+  document.getElementById('name-screen').style.display='none';
+  startGame();
 });
 
 // --- Shop ---
@@ -161,8 +163,7 @@ document.getElementById('left-btn').addEventListener('touchend',()=>{ keys['a']=
 document.getElementById('right-btn').addEventListener('touchstart',()=>{ keys['d']=true; });
 document.getElementById('right-btn').addEventListener('touchend',()=>{ keys['d']=false; });
 
-// --- Oyun Başlat/Durdur/Yeniden Başlat ---
-startBtn.addEventListener('click',()=>{ if(!gameActive){ startGame(); } });
+// --- Başlat/Durdur/Yeniden ---
 stopBtn.addEventListener('click',()=>{ gameActive=false; bgMusic.pause(); });
 restartBtn.addEventListener('click',()=>{ overlay.style.display='none'; startGame(); });
 
@@ -190,7 +191,6 @@ function spawnObject(){
   fallingObjects.push(obj);
 }
 
-// --- Efektler ---
 function createEffect(type,x,y){
   let effect=document.createElement('div');
   effect.style.position='absolute'; effect.style.left=x+'px'; effect.style.top=y+'px';
@@ -247,7 +247,7 @@ function updateLeaderboard(){
   db.ref('globalScores').orderByChild('score').limitToLast(10).once('value',snapshot=>{
     let table=document.getElementById('leaderboard-table'); table.innerHTML='<tr><th>Sıra</th><th>İsim</th><th>Skor</th></tr>';
     let data=[]; snapshot.forEach(child=>{ data.push({name:child.key, score:child.val().score}); });
-    data.sort((a,b)=>b.score-a.score);
+    data.sort((a,b)=>b.score-a.score;
     data.forEach((d,i)=>{ let row=table.insertRow(); row.insertCell(0).textContent=i+1; row.insertCell(1).textContent=d.name; row.insertCell(2).textContent=d.score; });
   });
 }
