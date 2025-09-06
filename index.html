@@ -41,10 +41,14 @@ footer{background:#0d6efd;color:#fff;text-align:center;padding:20px;}
 @media screen and (max-width:768px){.projects,.games,.skills,.blog,.contact-container{flex-direction:column;align-items:center}header h1{font-size:2em}}
 /* Mini Oyun ve Dükkan */
 #game-area{position:relative;width:400px;height:400px;background:#111;border:2px solid #0d6efd;margin:0 auto;overflow:hidden;}
-#player{position:absolute;width:50px;height:50px;background:red;bottom:0;left:175px;border-radius:5px;}
-.star{position:absolute;width:30px;height:30px;background:yellow;border-radius:50%;}
-#shop{margin:20px auto;text-align:center;}
-.shop-item{display:inline-block;margin:10px;padding:10px 15px;background:#0d6efd;color:#fff;border-radius:5px;cursor:pointer;}
+#player{position:absolute;width:50px;height:50px;background:red;bottom:0;left:175px;border-radius:5px;transition:0.2s;}
+.star,.bonus,.enemy{position:absolute;width:30px;height:30px;border-radius:50%;}
+.star{background:yellow;}
+.bonus{background:cyan;}
+.enemy{background:pink;}
+#shop{margin:20px auto;text-align:center;display:flex;justify-content:center;flex-wrap:wrap;gap:10px;}
+.shop-item{display:inline-block;margin:10px;padding:10px 15px;background:#0d6efd;color:#fff;border-radius:5px;cursor:pointer;transition:0.3s;}
+.shop-item:hover{background:#0b5ed7;}
 </style>
 </head>
 <body class="dark-mode">
@@ -125,13 +129,13 @@ footer{background:#0d6efd;color:#fff;text-align:center;padding:20px;}
 <h2>Mini Oyun: Düşen Yıldızları Yakala!</h2>
 <p>Seviye: <span id="level">1</span> | Puan: <span id="score">0</span> | Para: <span id="money">0</span> | Kalan Süre: <span id="time">30</span>s</p>
 <button id="start-btn" style="display:block;margin:0 auto 20px auto;padding:10px 20px;background:#0d6efd;color:#fff;border:none;border-radius:5px;cursor:pointer;">Oyunu Başlat</button>
-<div id="game-area">
-<div id="player"></div>
-</div>
+<div id="game-area"><div id="player"></div></div>
 <div id="shop">
 <h3>Dükkan / Kostümler</h3>
 <div class="shop-item" onclick="buyCostume('mavi',50)">Mavi Kostüm - 50 Para</div>
 <div class="shop-item" onclick="buyCostume('yeşil',100)">Yeşil Kostüm - 100 Para</div>
+<div class="shop-item" onclick="buyCostume('turuncu',150)">Turuncu Kostüm - 150 Para</div>
+<div class="shop-item" onclick="buyCostume('mor',200)">Mor Kostüm - 200 Para</div>
 </div>
 <p id="game-message" style="text-align:center; font-size:1.2em; color:#ff0; margin-top:15px;"></p>
 </section>
@@ -178,7 +182,10 @@ function toggleMode(){document.body.classList.toggle('light-mode');document.body
 
 // Skill bar animasyonu
 window.addEventListener('load',()=>{
-document.querySelectorAll('.skill-fill').forEach(bar=>{let width=bar.style.width;bar.style.width='0%';setTimeout(()=>{bar.style.width=width;},500);});
+document.querySelectorAll('.skill-fill').forEach(bar=>{
+let width=bar.style.width;bar.style.width='0%';
+setTimeout(()=>{bar.style.width=width;},500);
+});
 });
 
 // Mini Oyun
@@ -189,6 +196,7 @@ const levelDisplay=document.getElementById('level');
 const moneyDisplay=document.getElementById('money');
 const timeDisplay=document.getElementById('time');
 const message=document.getElementById('game-message');
+
 let score=0,level=1,time=30,money=0,speed=2,gameInterval,fallingInterval;
 let playerColor='red';
 document.addEventListener('mousemove',(e)=>{
@@ -197,35 +205,61 @@ document.addEventListener('mousemove',(e)=>{
   if(x<0)x=0;if(x>gameArea.clientWidth-player.offsetWidth)x=gameArea.clientWidth-player.offsetWidth;
   player.style.left=x+'px';
 });
-function createStar(){
-  const star=document.createElement('div');star.classList.add('star');
-  star.style.top='0px';star.style.left=Math.floor(Math.random()*(gameArea.clientWidth-30))+'px';
-  gameArea.appendChild(star);
-  let starFall=setInterval(()=>{
-    let y=parseInt(star.style.top);y+=speed;star.style.top=y+'px';
+
+function randomObject(){
+  let rand=Math.random();
+  if(rand<0.7) return 'star';
+  else if(rand<0.9) return 'bonus';
+  else return 'enemy';
+}
+
+function createFallingObject(){
+  const obj=document.createElement('div');
+  const type=randomObject();
+  obj.classList.add(type);
+  obj.style.top='0px';
+  obj.style.left=Math.floor(Math.random()*(gameArea.clientWidth-30))+'px';
+  gameArea.appendChild(obj);
+  let fall=setInterval(()=>{
+    let y=parseInt(obj.style.top);y+=speed;obj.style.top=y+'px';
     const playerRect=player.getBoundingClientRect();
-    const starRect=star.getBoundingClientRect();
-    if(!(playerRect.right<starRect.left||playerRect.left>starRect.right||playerRect.bottom<starRect.top||playerRect.top>starRect.bottom)){
-      score++;money+=10;scoreDisplay.textContent=score;moneyDisplay.textContent=money;
-      gameArea.removeChild(star);clearInterval(starFall);
-      if(score%5===0&&level<10){level++;levelDisplay.textContent=level;speed+=1;}
-      if(level===10&&score>=50){endGame(true);}
+    const objRect=obj.getBoundingClientRect();
+    if(!(playerRect.right<objRect.left||playerRect.left>objRect.right||playerRect.bottom<objRect.top||playerRect.top>objRect.bottom)){
+      if(type==='star'){score++;money+=10;}
+      else if(type==='bonus'){score+=2;money+=20;}
+      else if(type==='enemy'){score--;money-=10;}
+      scoreDisplay.textContent=score;moneyDisplay.textContent=money;
+      gameArea.removeChild(obj);clearInterval(fall);
+      if(score%5===0 && level<10){level++;levelDisplay.textContent=level;speed+=0.5;}
+      if(level===10 && score>=50){endGame(true);}
     }
-    if(y>gameArea.clientHeight){gameArea.removeChild(star);clearInterval(starFall);}
+    if(y>gameArea.clientHeight){gameArea.removeChild(obj);clearInterval(fall);}
   },20);
 }
+
 function startGame(){
   score=0;level=1;money=0;time=30;speed=2;
   scoreDisplay.textContent=score;levelDisplay.textContent=level;moneyDisplay.textContent=money;timeDisplay.textContent=time;
   player.style.background=playerColor;
   message.textContent='';
   clearInterval(gameInterval);clearInterval(fallingInterval);
-  gameInterval=setInterval(createStar,1000);
+  gameInterval=setInterval(createFallingObject,800);
   fallingInterval=setInterval(()=>{time--;timeDisplay.textContent=time;if(time<=0){endGame(false);}},1000);
 }
-function endGame(win){clearInterval(gameInterval);clearInterval(fallingInterval);document.querySelectorAll('.star').forEach(s=>s.remove());message.textContent=win?"🎉 Tebrikler! Oyunu tamamladınız!":"😢 Süre doldu! Tekrar deneyin.";}
+
+function endGame(win){
+  clearInterval(gameInterval);clearInterval(fallingInterval);
+  document.querySelectorAll('.star,.bonus,.enemy').forEach(s=>s.remove());
+  message.textContent=win?"🎉 Tebrikler! Oyunu tamamladınız!":"😢 Süre doldu! Tekrar deneyin.";
+}
+
 document.getElementById('start-btn').addEventListener('click',startGame);
-function buyCostume(color,price){if(money>=price){money-=price;moneyDisplay.textContent=money;playerColor=color;}else{alert("Yeterli paran yok!");}}
+
+function buyCostume(color,price){
+  if(money>=price){money-=price;moneyDisplay.textContent=money;playerColor=color;}else{alert("Yeterli paran yok!");}
+}
 </script>
+
 </body>
 </html>
+
