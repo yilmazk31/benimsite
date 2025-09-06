@@ -7,9 +7,15 @@
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#000; color:#fff; text-align:center; }
 h1,h2,h3 { color:#0d6efd; margin:10px 0; }
-#name-screen { position:fixed;top:0;left:0;width:100%;height:100%;background:#0b0b0b;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:500; }
-#name-screen h1 { font-size:3em; color:#0d6efd; text-shadow:2px 2px 5px #000; }
-#name-screen input { padding:15px; font-size:18px; margin-top:15px; border-radius:10px; border:none; outline:none; width:200px; text-align:center; }
+#name-screen {
+  position:fixed;
+  top:0; left:0; width:100%; height:100%;
+  background: url('https://i.imgur.com/2kZC9bg.jpg') no-repeat center center/cover;
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  z-index:500; text-shadow: 2px 2px 4px #000;
+}
+#name-screen h1 { font-size:3em; margin-bottom:20px; }
+#name-screen input { padding:15px; font-size:18px; margin-top:15px; border-radius:10px; border:none; outline:none; width:220px; text-align:center; }
 #name-screen button { margin-top:15px; padding:15px 30px; background:#0d6efd; color:#fff; border:none; border-radius:10px; cursor:pointer; font-size:18px; transition:0.2s; }
 #name-screen button:hover { background:#0a58ca; }
 #game-area { position:relative; width:90%; max-width:400px; height:400px; background:#111; border:2px solid #0d6efd; margin:20px auto; overflow:hidden; border-radius:10px; }
@@ -34,15 +40,15 @@ h1,h2,h3 { color:#0d6efd; margin:10px 0; }
 <body>
 
 <div id="name-screen">
-  <h1>YılmazK Oyun</h1>
+  <h1>YılmazK Oyun 🎮</h1>
   <input type="text" id="player-name-input" placeholder="İsminizi yazın">
-  <button id="save-name-btn">Başla</button>
+  <button id="save-name-btn">Başla 🚀</button>
 </div>
 
 <h1>Yılmaz Karabulut Oyun</h1>
 
 <div id="game-area">
-  <div id="player"></div>
+  <div id="player">😀</div>
   <div id="game-overlay">
     <div id="overlay-message">Kaybettiniz 😢</div>
     <button id="restart-btn">Yeniden Başlat</button>
@@ -84,7 +90,6 @@ h1,h2,h3 { color:#0d6efd; margin:10px 0; }
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
 
-// --- Firebase config buraya ---
 const firebaseConfig = {
   apiKey: "BURAYA",
   authDomain: "BURAYA",
@@ -115,7 +120,7 @@ const globalTable=document.getElementById('global-table');
 let score=0, money=100, time=0, health=100, gameActive=false, playerPos=175, keys={}, selectedHat=null, selectedOutfit=null, selectedFace=null;
 let fallingObjects=[];
 
-// --- İsim ve başlat ---
+// --- Başla ve isim ---
 saveBtn.addEventListener('click',()=>{
   let val=playerNameInput.value.trim();
   if(!val){ alert('Lütfen isim girin!'); return; }
@@ -179,7 +184,7 @@ function savePlayerData(name){
 function startGame(){
   score=0; time=0; health=100; gameActive=true; playerPos=175;
   player.style.left=playerPos+'px';
-  player.textContent = (selectedHat||'') + (selectedOutfit||'') + (selectedFace||'');
+  player.textContent = (selectedHat||'') + (selectedOutfit||'') + (selectedFace||'') + '😀';
   scoreDisplay.textContent=score; moneyDisplay.textContent=money; timeDisplay.textContent=time;
   healthInner.style.width='100%';
   fallingObjects.forEach(o=>o.remove()); fallingObjects=[];
