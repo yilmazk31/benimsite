@@ -40,6 +40,13 @@ footer{background:#0d6efd;color:#fff;text-align:center;padding:20px;}
 #control-buttons{display:flex;justify-content:center;gap:10px;margin-top:10px;}
 .control-btn{padding:8px 15px;background:#ff6600;color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:bold;}
 .control-btn:hover{background:#e05500;}
+#mobile-controls{display:none; text-align:center; margin-top:10px;}
+@media (max-width:500px){
+  #game-area{width:90%; height:300px;}
+  #player{width:40px; height:40px;}
+  #mobile-controls{display:flex; justify-content:center; gap:10px; margin-top:10px;}
+  .control-btn{padding:15px 20px; font-size:1.2em;}
+}
 </style>
 </head>
 <body>
@@ -91,6 +98,12 @@ footer{background:#0d6efd;color:#fff;text-align:center;padding:20px;}
   <button id="start-btn" class="control-btn">Oyunu Başlat</button>
   <button id="stop-btn" class="control-btn">Oyunu Durdur</button>
 </div>
+
+<div id="mobile-controls">
+  <button id="left-btn" class="control-btn">⬅️</button>
+  <button id="right-btn" class="control-btn">➡️</button>
+</div>
+
 <p>
 Seviye: <span id="level-display">1</span> | 
 Puan: <span id="score-display">0</span> | 
@@ -161,22 +174,41 @@ function restartGame(){
   startGame();
 }
 
+// Bilgisayar ok tuşları
 document.addEventListener('keydown', e=>{
   if(!gameActive) return;
   let left=parseInt(player.style.left || 175);
   if(e.key==='ArrowLeft'){left-=playerSpeed;}
   if(e.key==='ArrowRight'){left+=playerSpeed;}
   if(left<0) left=0;
-  if(left>350) left=350;
+  if(left>gameArea.offsetWidth-50) left=gameArea.offsetWidth-50;
   player.style.left=left+'px';
 });
 
+// Mobil butonlar
+const leftBtn=document.getElementById('left-btn');
+const rightBtn=document.getElementById('right-btn');
+
+function moveLeft(){ 
+  let left=parseInt(player.style.left || 175);
+  left-=playerSpeed; if(left<0) left=0; player.style.left=left+'px';
+}
+function moveRight(){
+  let left=parseInt(player.style.left || 175);
+  left+=playerSpeed; if(left>gameArea.offsetWidth-50) left=gameArea.offsetWidth-50; player.style.left=left+'px';
+}
+
+leftBtn.addEventListener('touchstart',()=>{if(gameActive) moveLeft();});
+rightBtn.addEventListener('touchstart',()=>{if(gameActive) moveRight();});
+
+// Falling Objects
 function spawnFallingObject(){
   if(!gameActive) return;
   const obj=document.createElement('div');
   obj.classList.add('star');
-  obj.style.left=Math.floor(Math.random()*370)+'px';
+  obj.style.left=Math.floor(Math.random()*(gameArea.offsetWidth-20))+'px';
   obj.style.top='0px';
+  obj.style.width='20px'; obj.style.height='20px'; obj.style.background='yellow'; obj.style.position='absolute'; obj.style.borderRadius='50%';
   gameArea.appendChild(obj);
   fallingObjects.push(obj);
   moveFallingObject(obj);
@@ -202,11 +234,12 @@ function moveFallingObject(obj){
         levelDisplay.textContent=level;
       } 
     }
-    if(top>400){obj.remove(); clearInterval(interval);}
+    if(top>gameArea.offsetHeight){obj.remove(); clearInterval(interval);}
     if(level>=10){endGame(true);}
   },30);
 }
 
+// Shop
 function buyCostume(item){
   const cost=parseInt(item.dataset.cost);
   if(cost<=100){ item.classList.remove('locked'); alert(item.textContent+' seçildi!'); }
@@ -214,6 +247,7 @@ function buyCostume(item){
 }
 function selectCostume(name){alert(name+' seçildi!');}
 
+// Game Over
 function endGame(win=false){
   gameActive=false;
   overlay.style.display='flex';
