@@ -10,11 +10,11 @@ h1,h2,h3 { color:#0d6efd; margin:10px 0; }
 #name-screen {
   position:fixed;
   top:0; left:0; width:100%; height:100%;
-  background: url('https://i.imgur.com/2kZC9bg.jpg') no-repeat center center/cover;
+  background:#000; /* siyah arka plan */
   display:flex; flex-direction:column; justify-content:center; align-items:center;
   z-index:500; text-shadow: 2px 2px 4px #000;
 }
-#name-screen h1 { font-size:3em; margin-bottom:20px; }
+#name-screen h1 { font-size:3em; margin-bottom:20px; color:#0d6efd; }
 #name-screen input { padding:15px; font-size:18px; margin-top:15px; border-radius:10px; border:none; outline:none; width:220px; text-align:center; }
 #name-screen button { margin-top:15px; padding:15px 30px; background:#0d6efd; color:#fff; border:none; border-radius:10px; cursor:pointer; font-size:18px; transition:0.2s; }
 #name-screen button:hover { background:#0a58ca; }
@@ -120,13 +120,13 @@ const globalTable=document.getElementById('global-table');
 let score=0, money=100, time=0, health=100, gameActive=false, playerPos=175, keys={}, selectedHat=null, selectedOutfit=null, selectedFace=null;
 let fallingObjects=[];
 
-// --- Başla ve isim ---
+// Başla ve isim
 saveBtn.addEventListener('click',()=>{
   let val=playerNameInput.value.trim();
   if(!val){ alert('Lütfen isim girin!'); return; }
   window.playerName=val;
   nameScreen.style.display='none';
-  loadPlayerData(window.playerName, startGame);
+  startGame();
 });
 
 restartBtn.addEventListener('click',()=>{
@@ -134,7 +134,7 @@ restartBtn.addEventListener('click',()=>{
   startGame();
 });
 
-// --- Kontroller ---
+// Kontroller
 document.addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; });
 document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
 document.getElementById('left-btn').addEventListener('touchstart',()=>{ keys['a']=true; });
@@ -142,7 +142,7 @@ document.getElementById('left-btn').addEventListener('touchend',()=>{ keys['a']=
 document.getElementById('right-btn').addEventListener('touchstart',()=>{ keys['d']=true; });
 document.getElementById('right-btn').addEventListener('touchend',()=>{ keys['d']=false; });
 
-// --- Shop ---
+// Shop
 shopItems.forEach(item=>{
   item.addEventListener('click',()=>{
     const cost=parseInt(item.dataset.cost);
@@ -153,34 +153,12 @@ shopItems.forEach(item=>{
       if(type==='outfit') selectedOutfit='👕';
       if(type==='face') selectedFace='😎';
       moneyDisplay.textContent=money;
-      savePlayerData(window.playerName);
-      player.textContent = (selectedHat||'') + (selectedOutfit||'') + (selectedFace||'');
+      player.textContent = (selectedHat||'') + (selectedOutfit||'') + (selectedFace||'') + '😀';
     }
   });
 });
 
-// --- Firebase yükleme ---
-function loadPlayerData(name, callback){
-  db.ref('players/'+name).once('value',snapshot=>{
-    const data=snapshot.val();
-    if(data){
-      if(data.selectedHat) selectedHat=data.selectedHat;
-      if(data.selectedOutfit) selectedOutfit=data.selectedOutfit;
-      if(data.selectedFace) selectedFace=data.selectedFace;
-      money=data.money||100;
-    }
-    callback();
-  });
-}
-
-// --- Firebase kaydetme ---
-function savePlayerData(name){
-  db.ref('players/'+name).set({
-    selectedHat, selectedOutfit, selectedFace, money
-  });
-}
-
-// --- Başlat ---
+// Başlat
 function startGame(){
   score=0; time=0; health=100; gameActive=true; playerPos=175;
   player.style.left=playerPos+'px';
@@ -191,7 +169,7 @@ function startGame(){
   requestAnimationFrame(gameLoop);
 }
 
-// --- Objeler ---
+// Objeler
 function spawnObject(){
   const obj=document.createElement('div');
   obj.classList.add('falling');
@@ -206,7 +184,7 @@ function spawnObject(){
   fallingObjects.push(obj);
 }
 
-// --- Oyun döngüsü ---
+// Oyun döngüsü
 function gameLoop(){
   if(!gameActive) return;
   time++; timeDisplay.textContent=time;
@@ -238,31 +216,10 @@ function gameLoop(){
     gameActive=false; 
     overlayMessage.textContent='Kaybettiniz 😢'; 
     gameOverlay.style.display='flex'; 
-    savePlayerData(window.playerName); 
-    updateGlobalScore(window.playerName, score); 
   }
 
   if(gameActive) requestAnimationFrame(gameLoop);
 }
-
-// --- Global skor ---
-function updateGlobalScore(playerName, score){
-  db.ref('scores/'+playerName).set(score);
-  db.ref('scores').orderByValue().limitToLast(10).once('value',snapshot=>{
-    let html='<tr><th>Sıra</th><th>İsim</th><th>Skor</th></tr>';
-    let arr=[];
-    snapshot.forEach(child=>{
-      arr.push({name:child.key, score:child.val()});
-    });
-    arr.sort((a,b)=>b.score-a.score);
-    arr.forEach((item,i)=>{
-      html+='<tr><td>'+(i+1)+'</td><td>'+item.name+'</td><td>'+item.score+'</td></tr>';
-    });
-    globalTable.innerHTML=html;
-  });
-}
-
-});
 </script>
 </body>
 </html>
