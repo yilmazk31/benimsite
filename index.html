@@ -6,7 +6,7 @@
 <title>Yılmaz Karabulut Oyun</title>
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#000; color:#fff; text-align:center; }
-h1,h2 { color:#0d6efd; }
+h1,h2,h3 { color:#0d6efd; }
 #name-screen { position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:500; }
 #name-screen input { padding:10px; font-size:16px; margin-top:10px; }
 #name-screen button { margin-top:10px; padding:10px 20px; background:#0d6efd; color:#fff; border:none; border-radius:5px; cursor:pointer; }
@@ -16,12 +16,16 @@ h1,h2 { color:#0d6efd; }
 .coin { background:gold; box-shadow:0 0 15px gold; }
 .enemy { background:red; box-shadow:0 0 15px red; }
 .bonus { background:cyan; box-shadow:0 0 15px cyan; }
-.health-bar { width:100%; background:#555; height:20px; border-radius:10px; margin-bottom:10px; }
+.health-bar { width:90%; max-width:400px; background:#555; height:20px; border-radius:10px; margin:10px auto; }
 .health-inner { width:100%; height:100%; background:red; }
 #game-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); color:#fff; display:flex; flex-direction:column; justify-content:center; align-items:center; font-size:2em; border-radius:10px; display:none; z-index:100; }
 #mobile-controls { display:flex; justify-content:center; gap:20px; margin-top:10px; }
 .mobile-btn { width:60px; height:60px; font-size:24px; border:none; border-radius:50%; background:#0d6efd; color:#fff; cursor:pointer; }
-.mobile-btn:active { background:#0a58ca; }
+#shop { margin:20px auto; width:90%; max-width:400px; background:#222; padding:10px; border-radius:10px; }
+.shop-item { display:inline-block; margin:5px; padding:5px 10px; background:#0d6efd; border-radius:5px; cursor:pointer; }
+#info { margin:20px; padding:10px; background:#111; border:1px solid #0d6efd; border-radius:10px; text-align:left; }
+#global-table { margin:10px auto; width:90%; max-width:400px; border-collapse:collapse; }
+#global-table th, #global-table td { border:1px solid #0d6efd; padding:5px; color:#fff; }
 </style>
 </head>
 <body>
@@ -50,103 +54,127 @@ h1,h2 { color:#0d6efd; }
   <button id="right-btn" class="mobile-btn">▶</button>
 </div>
 
-<audio id="hit-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-<audio id="gameover-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
-<audio id="bg-music" src="https://actions.google.com/sounds/v1/ambiences/forest_ambience.ogg" loop></audio>
+<div id="shop">
+  <h3>Dükkan</h3>
+  <div class="shop-item" data-cost="50" data-color="blue">Mavi Kostüm - 50</div>
+  <div class="shop-item" data-cost="100" data-color="purple">Mor Kostüm - 100</div>
+</div>
+
+<div id="info">
+  <h3>Oyun Bilgisi</h3>
+  <p>Oyuncu hareketleri: PC A/D tuşları, Mobil ◀ ▶ tuşları.</p>
+  <p>Coin toplayın, düşmanlardan kaçın, bonusları yakalayın.</p>
+</div>
+
+<h3>İletişim</h3>
+<p>Yardım için: <a href="mailto:yilmazkarabulut@akhisarkoleji.com">yilmazkarabulut@akhisarkoleji.com</a></p>
+
+<h3>Global Skor Tablosu (Örnek)</h3>
+<table id="global-table">
+<tr><th>Sıra</th><th>İsim</th><th>Skor</th></tr>
+<tr><td>1</td><td>Oyuncu1</td><td>100</td></tr>
+<tr><td>2</td><td>Oyuncu2</td><td>90</td></tr>
+<tr><td>3</td><td>Oyuncu3</td><td>80</td></tr>
+</table>
 
 <script>
-let player=document.getElementById('player');
-let gameArea=document.getElementById('game-area');
-let scoreDisplay=document.getElementById('score-display');
-let moneyDisplay=document.getElementById('money-display');
-let timeDisplay=document.getElementById('time-display');
-let overlay=document.getElementById('game-overlay');
-let overlayMessage=document.getElementById('overlay-message');
-let restartBtn=document.getElementById('restart-btn');
-let healthInner=document.getElementById('health-inner');
-let hitSound=document.getElementById('hit-sound');
-let gameOverSound=document.getElementById('gameover-sound');
-let bgMusic=document.getElementById('bg-music');
+document.addEventListener('DOMContentLoaded',()=>{
+  const nameScreen=document.getElementById('name-screen');
+  const playerNameInput=document.getElementById('player-name-input');
+  const saveBtn=document.getElementById('save-name-btn');
+  const restartBtn=document.getElementById('restart-btn');
+  const gameOverlay=document.getElementById('game-overlay');
+  const overlayMessage=document.getElementById('overlay-message');
+  const player=document.getElementById('player');
+  const gameArea=document.getElementById('game-area');
+  const scoreDisplay=document.getElementById('score-display');
+  const moneyDisplay=document.getElementById('money-display');
+  const timeDisplay=document.getElementById('time-display');
+  const healthInner=document.getElementById('health-inner');
+  const shopItems=document.querySelectorAll('.shop-item');
 
-let score=0,money=100,time=0,health=100,gameActive=false,fallingObjects=[],difficultyMultiplier=1;
-let playerName="",playerPos=175,keys={};
+  let score=0, money=100, time=0, health=100, gameActive=false, playerPos=175, keys={}, selectedColor='lime';
+  let fallingObjects=[];
 
-document.getElementById('save-name-btn').addEventListener('click',()=>{
-  let val=document.getElementById('player-name-input').value.trim();
-  playerName=val?val:"Oyuncu";
-  document.getElementById('name-screen').style.display='none';
-  startGame();
-});
+  saveBtn.addEventListener('click',()=>{
+    let val=playerNameInput.value.trim();
+    window.playerName=val?val:'Oyuncu';
+    nameScreen.style.display='none';
+    startGame();
+  });
 
-document.addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; });
-document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
+  restartBtn.addEventListener('click',()=>{
+    gameOverlay.style.display='none';
+    startGame();
+  });
 
-document.getElementById('left-btn').addEventListener('touchstart',()=>{ keys['a']=true; });
-document.getElementById('left-btn').addEventListener('touchend',()=>{ keys['a']=false; });
-document.getElementById('right-btn').addEventListener('touchstart',()=>{ keys['d']=true; });
-document.getElementById('right-btn').addEventListener('touchend',()=>{ keys['d']=false; });
+  document.addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; });
+  document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
 
-restartBtn.addEventListener('click',()=>{ overlay.style.display='none'; startGame(); });
+  document.getElementById('left-btn').addEventListener('touchstart',()=>{ keys['a']=true; });
+  document.getElementById('left-btn').addEventListener('touchend',()=>{ keys['a']=false; });
+  document.getElementById('right-btn').addEventListener('touchstart',()=>{ keys['d']=true; });
+  document.getElementById('right-btn').addEventListener('touchend',()=>{ keys['d']=false; });
 
-function startGame(){
-  score=0; money=100; time=0; health=100; difficultyMultiplier=1; gameActive=true; fallingObjects=[]; playerPos=175;
-  player.style.left=playerPos+'px';
-  scoreDisplay.textContent=score; moneyDisplay.textContent=money; timeDisplay.textContent=time;
-  healthInner.style.width='100%';
-  overlay.style.display='none';
-  bgMusic.currentTime=0; bgMusic.play();
-  requestAnimationFrame(gameLoop);
-}
+  shopItems.forEach(item=>{
+    item.addEventListener('click',()=>{
+      const cost=parseInt(item.dataset.cost);
+      const color=item.dataset.color;
+      if(money>=cost){ money-=cost; selectedColor=color; player.style.backgroundColor=color; moneyDisplay.textContent=money; }
+    });
+  });
 
-function spawnObject(){
-  let objType=Math.random();
-  let obj=document.createElement('div');
-  obj.classList.add('falling');
-  obj.style.left=Math.random()*370+'px';
-  obj.style.top='0px';
-  if(objType<0.6) obj.classList.add('coin');
-  else if(objType<0.9) obj.classList.add('enemy');
-  else obj.classList.add('bonus');
-  gameArea.appendChild(obj);
-  fallingObjects.push(obj);
-}
-
-function gameLoop(){
-  if(!gameActive) return;
-  time++; timeDisplay.textContent=time;
-
-  if(keys['a'] && playerPos>0) playerPos-=5;
-  if(keys['d'] && playerPos<350) playerPos+=5;
-  player.style.left=playerPos+'px';
-
-  if(Math.random()<0.02*difficultyMultiplier) spawnObject();
-
-  for(let i=fallingObjects.length-1;i>=0;i--){
-    let obj=fallingObjects[i];
-    obj.style.top=parseInt(obj.style.top)+2*difficultyMultiplier+'px';
-    if(parseInt(obj.style.top)+30>=350 && parseInt(obj.style.left)+30>playerPos && parseInt(obj.style.left)<playerPos+50){
-      if(obj.classList.contains('coin')){ score+=10; money+=5; }
-      if(obj.classList.contains('enemy')){ health-=20; hitSound.play(); healthInner.style.width=health+'%'; }
-      if(obj.classList.contains('bonus')){ money+=20; score+=20; }
-      obj.remove(); fallingObjects.splice(i,1);
-    } else if(parseInt(obj.style.top)>400){ obj.remove(); fallingObjects.splice(i,1); }
+  function startGame(){
+    score=0; money=100; time=0; health=100; gameActive=true; playerPos=175;
+    player.style.left=playerPos+'px'; player.style.backgroundColor=selectedColor;
+    scoreDisplay.textContent=score; moneyDisplay.textContent=money; timeDisplay.textContent=time;
+    healthInner.style.width='100%';
+    fallingObjects.forEach(o=>o.remove()); fallingObjects=[];
+    requestAnimationFrame(gameLoop);
   }
 
-  scoreDisplay.textContent=score;
-  moneyDisplay.textContent=money;
+  function spawnObject(){
+    const obj=document.createElement('div');
+    obj.classList.add('falling');
+    obj.style.left=Math.random()*370+'px';
+    obj.style.top='0px';
+    obj.classList.add(Math.random()<0.6?'coin':Math.random()<0.9?'enemy':'bonus');
+    gameArea.appendChild(obj);
+    fallingObjects.push(obj);
+    return obj;
+  }
 
-  if(health<=0){ endGame(); return; }
-  difficultyMultiplier+=0.0005;
-  requestAnimationFrame(gameLoop);
-}
+  function gameLoop(){
+    if(!gameActive) return;
+    time++; timeDisplay.textContent=time;
 
-function endGame(){
-  gameActive=false;
-  overlayMessage.textContent='Kaybettiniz 😢';
-  overlay.style.display='flex';
-  gameOverSound.play();
-  bgMusic.pause();
-}
+    if(keys['a'] && playerPos>0) playerPos-=5;
+    if(keys['d'] && playerPos<350) playerPos+=5;
+    player.style.left=playerPos+'px';
+
+    if(Math.random()<0.02) spawnObject();
+
+    for(let i=fallingObjects.length-1;i>=0;i--){
+      let obj=fallingObjects[i];
+      obj.style.top=parseInt(obj.style.top)+2+'px';
+      const objLeft=parseInt(obj.style.left), objTop=parseInt(obj.style.top);
+      if(objTop+30>=350 && objLeft+30>playerPos && objLeft<playerPos+50){
+        if(obj.classList.contains('coin')){ score+=10; money+=5; }
+        if(obj.classList.contains('enemy')){ health-=20; }
+        if(obj.classList.contains('bonus')){ money+=20; score+=20; }
+        obj.remove(); fallingObjects.splice(i,1);
+      } else if(objTop>400){ obj.remove(); fallingObjects.splice(i,1); }
+    }
+
+    scoreDisplay.textContent=score;
+    moneyDisplay.textContent=money;
+    healthInner.style.width=health+'%';
+
+    if(health<=0){ gameActive=false; overlayMessage.textContent='Kaybettiniz 😢'; gameOverlay.style.display='flex'; }
+
+    if(gameActive) requestAnimationFrame(gameLoop);
+  }
+});
 </script>
 
 </body>
