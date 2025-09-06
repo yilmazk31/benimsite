@@ -11,7 +11,7 @@ h1,h2,h3 { color:#0d6efd; }
 #name-screen input { padding:10px; font-size:16px; margin-top:10px; }
 #name-screen button { margin-top:10px; padding:10px 20px; background:#0d6efd; color:#fff; border:none; border-radius:5px; cursor:pointer; }
 #game-area { position:relative; width:90%; max-width:400px; height:400px; background:#111; border:2px solid #0d6efd; margin:20px auto; overflow:hidden; border-radius:10px; }
-#player { position:absolute; bottom:10px; left:175px; width:50px; height:50px; border-radius:50%; transition:left 0.05s linear; background:lime; }
+#player { position:absolute; bottom:10px; left:175px; width:50px; height:50px; border-radius:50%; transition:left 0.05s linear; background:lime; display:flex; justify-content:center; align-items:center; font-size:24px; }
 .falling { position:absolute; top:0; width:30px; height:30px; border-radius:50%; }
 .coin { background:gold; box-shadow:0 0 15px gold; }
 .enemy { background:red; box-shadow:0 0 15px red; }
@@ -30,7 +30,6 @@ h1,h2,h3 { color:#0d6efd; }
 </head>
 <body>
 
-<!-- İsim ekranı -->
 <div id="name-screen">
   <h2>Oyuncu Adınızı Girin</h2>
   <input type="text" id="player-name-input" placeholder="İsminizi yazın">
@@ -39,7 +38,6 @@ h1,h2,h3 { color:#0d6efd; }
 
 <h1>Yılmaz Karabulut Oyun</h1>
 
-<!-- Oyun alanı -->
 <div id="game-area">
   <div id="player"></div>
   <div id="game-overlay">
@@ -48,17 +46,14 @@ h1,h2,h3 { color:#0d6efd; }
   </div>
 </div>
 
-<!-- Sağlık ve skor -->
 <div class="health-bar"><div id="health-inner"></div></div>
 <p>Puan: <span id="score-display">0</span> | Para: <span id="money-display">100</span> | Zaman: <span id="time-display">0</span>s</p>
 
-<!-- Mobil kontroller -->
 <div id="mobile-controls">
   <button id="left-btn" class="mobile-btn">◀</button>
   <button id="right-btn" class="mobile-btn">▶</button>
 </div>
 
-<!-- Dükkan -->
 <div id="shop">
   <h3>Dükkan</h3>
   <div class="shop-item" data-cost="50" data-type="hat">Şapka - 50</div>
@@ -66,7 +61,6 @@ h1,h2,h3 { color:#0d6efd; }
   <div class="shop-item" data-cost="150" data-type="face">Yüz İfadesi - 150</div>
 </div>
 
-<!-- Bilgilendirme ve iletişim -->
 <div id="info">
   <h3>Oyun Bilgisi</h3>
   <p>PC: A/D tuşları, Mobil: ◀ ▶ tuşları</p>
@@ -81,7 +75,6 @@ h1,h2,h3 { color:#0d6efd; }
 <tr><th>Sıra</th><th>İsim</th><th>Skor</th></tr>
 </table>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
@@ -119,12 +112,12 @@ const globalTable=document.getElementById('global-table');
 let score=0, money=100, time=0, health=100, gameActive=false, playerPos=175, keys={}, selectedHat=null, selectedOutfit=null, selectedFace=null;
 let fallingObjects=[];
 
-// İsim ve başlat
+// --- İsim ve başlat ---
 saveBtn.addEventListener('click',()=>{
   let val=playerNameInput.value.trim();
   window.playerName=val?val:'Oyuncu';
   nameScreen.style.display='none';
-  startGame();
+  loadPlayerData(window.playerName, startGame);
 });
 
 restartBtn.addEventListener('click',()=>{
@@ -132,7 +125,7 @@ restartBtn.addEventListener('click',()=>{
   startGame();
 });
 
-// Kontroller
+// --- Kontroller ---
 document.addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; });
 document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
 document.getElementById('left-btn').addEventListener('touchstart',()=>{ keys['a']=true; });
@@ -140,7 +133,7 @@ document.getElementById('left-btn').addEventListener('touchend',()=>{ keys['a']=
 document.getElementById('right-btn').addEventListener('touchstart',()=>{ keys['d']=true; });
 document.getElementById('right-btn').addEventListener('touchend',()=>{ keys['d']=false; });
 
-// Shop
+// --- Shop ---
 shopItems.forEach(item=>{
   item.addEventListener('click',()=>{
     const cost=parseInt(item.dataset.cost);
@@ -151,22 +144,44 @@ shopItems.forEach(item=>{
       if(type==='outfit') selectedOutfit='👕';
       if(type==='face') selectedFace='😎';
       moneyDisplay.textContent=money;
+      savePlayerData(window.playerName); // kalıcı
     }
   });
 });
 
-// Başlat
+// --- Firebase yükleme ---
+function loadPlayerData(name, callback){
+  db.ref('players/'+name).once('value',snapshot=>{
+    const data=snapshot.val();
+    if(data){
+      if(data.selectedHat) selectedHat=data.selectedHat;
+      if(data.selectedOutfit) selectedOutfit=data.selectedOutfit;
+      if(data.selectedFace) selectedFace=data.selectedFace;
+      money=data.money||100;
+    }
+    callback();
+  });
+}
+
+// --- Firebase kaydetme ---
+function savePlayerData(name){
+  db.ref('players/'+name).set({
+    selectedHat, selectedOutfit, selectedFace, money
+  });
+}
+
+// --- Başlat ---
 function startGame(){
-  score=0; money=100; time=0; health=100; gameActive=true; playerPos=175;
+  score=0; time=0; health=100; gameActive=true; playerPos=175;
   player.style.left=playerPos+'px';
-  player.textContent = selectedHat+selectedOutfit+selectedFace || '';
+  player.textContent = (selectedHat||'') + (selectedOutfit||'') + (selectedFace||'');
   scoreDisplay.textContent=score; moneyDisplay.textContent=money; timeDisplay.textContent=time;
   healthInner.style.width='100%';
   fallingObjects.forEach(o=>o.remove()); fallingObjects=[];
   requestAnimationFrame(gameLoop);
 }
 
-// Objeler
+// --- Objeler ---
 function spawnObject(){
   const obj=document.createElement('div');
   obj.classList.add('falling');
@@ -180,7 +195,7 @@ function spawnObject(){
   fallingObjects.push(obj);
 }
 
-// Oyun döngüsü
+// --- Oyun döngüsü ---
 function gameLoop(){
   if(!gameActive) return;
   time++; timeDisplay.textContent=time;
@@ -207,15 +222,20 @@ function gameLoop(){
   moneyDisplay.textContent=money;
   healthInner.style.width=health+'%';
 
-  if(health<=0){ gameActive=false; overlayMessage.textContent='Kaybettiniz 😢'; gameOverlay.style.display='flex'; updateGlobalScore(); }
+  if(health<=0){ 
+    gameActive=false; 
+    overlayMessage.textContent='Kaybettiniz 😢'; 
+    gameOverlay.style.display='flex'; 
+    savePlayerData(window.playerName); // kalıcı
+    updateGlobalScore(window.playerName, score); 
+  }
 
   if(gameActive) requestAnimationFrame(gameLoop);
 }
 
-// Global skor güncelle
-function updateGlobalScore(){
-  const ref = db.ref('scores/'+window.playerName);
-  ref.set(score);
+// --- Global skor ---
+function updateGlobalScore(playerName, score){
+  db.ref('scores/'+playerName).set(score);
   db.ref('scores').orderByValue().limitToLast(10).once('value',snapshot=>{
     let html='<tr><th>Sıra</th><th>İsim</th><th>Skor</th></tr>';
     let arr=[];
@@ -232,6 +252,5 @@ function updateGlobalScore(){
 
 });
 </script>
-
 </body>
 </html>
