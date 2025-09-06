@@ -1,246 +1,110 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Yılmaz Karabulut - Oyun Geliştirici</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Roboto', sans-serif;
-      background-color: #1e1e1e;
-      color: #fff;
-    }
-
-    nav {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      background: #0d6efd;
-      color: #fff;
-      padding: 15px 0;
-      text-align: center;
-      z-index: 100;
-    }
-
-    nav a {
-      margin: 0 20px;
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    nav a:hover {
-      text-decoration: underline;
-    }
-
-    header {
-      background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-      color: #fff;
-      text-align: center;
-      padding: 150px 20px 100px 20px;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 3em;
-      animation: fadeIn 2s ease-in-out;
-    }
-
-    header p {
-      font-size: 1.2em;
-      margin-top: 10px;
-    }
-
-    @keyframes fadeIn {
-      from {opacity:0;}
-      to {opacity:1;}
-    }
-
-    section {
-      padding: 60px 20px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 40px;
-      font-size: 2em;
-      color: #0d6efd;
-    }
-
-    .projects {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-    }
-
-    .project {
-      background: #2c2c2c;
-      border-radius: 10px;
-      padding: 20px;
-      width: 300px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      text-align: center;
-      transition: 0.3s;
-    }
-
-    .project:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-    }
-
-    .project img {
-      max-width: 100%;
-      border-radius: 10px;
-    }
-
-    .project h3 {
-      margin: 15px 0 10px;
-      color: #6a11cb;
-    }
-
-    .project p {
-      font-size: 0.95em;
-    }
-
-    footer {
-      background: #0d6efd;
-      color: #fff;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .contact-btn, button {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #ff6600;
-      color: #fff;
-      text-decoration: none;
-      border-radius: 5px;
-      margin-top: 15px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      transition: 0.3s;
-    }
-
-    .contact-btn:hover, button:hover {
-      background-color: #e05500;
-    }
-
-    form input, form textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 1em;
-    }
-
-    .games {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    .game {
-      background: #2c2c2c;
-      padding: 15px;
-      border-radius: 10px;
-      width: 200px;
-      text-align: center;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    }
-
-    .game img {
-      max-width: 100%;
-      border-radius: 10px;
-    }
-
-    @media screen and (max-width: 768px) {
-      .projects, .games { flex-direction: column; align-items: center; }
-      header h1 { font-size: 2em; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yılmaz Karabulut - Oyun Geliştirici</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+body { margin:0; font-family:'Roboto',sans-serif; background:#1e1e1e; color:#fff; scroll-behavior:smooth;}
+nav {position:fixed;top:0;width:100%;background:#0d6efd;padding:15px;text-align:center;z-index:100;}
+nav a {margin:0 20px;color:#fff;text-decoration:none;font-weight:bold;}
+nav a:hover {text-decoration:underline;}
+header {background:linear-gradient(135deg,#6a11cb 0%,#2575fc 100%);text-align:center;padding:150px 20px 100px 20px;position:relative;}
+header::after {content:"";background:url('https://cdn.pixabay.com/photo/2017/05/10/20/30/video-game-2306740_1280.jpg') center/cover no-repeat;opacity:0.2;position:absolute;top:0;left:0;width:100%;height:100%;z-index:-1;}
+header h1 {margin:0;font-size:3em;animation:fadeIn 2s ease-in-out;}
+header p {font-size:1.2em;margin-top:10px;}
+@keyframes fadeIn {from{opacity:0;}to{opacity:1;}}
+section {padding:60px 20px;max-width:1000px;margin:0 auto;}
+h2 {text-align:center;margin-bottom:40px;font-size:2em;color:#0d6efd;}
+.projects,.games {display:flex;flex-wrap:wrap;justify-content:center;gap:20px;}
+.project,.game {background:#2c2c2c;border-radius:10px;padding:20px;width:300px;text-align:center;box-shadow:0 5px 15px rgba(0,0,0,0.3);transition:0.3s;cursor:pointer;}
+.project:hover,.game:hover {transform:translateY(-5px);box-shadow:0 10px 20px rgba(0,0,0,0.5);}
+.project img,.game img {max-width:100%;border-radius:10px;}
+.project h3,.game h3 {margin:15px 0 10px;color:#6a11cb;}
+.project p {font-size:0.95em;}
+footer {background:#0d6efd;color:#fff;text-align:center;padding:20px;}
+.contact-btn,button {display:inline-block;padding:10px 20px;background-color:#ff6600;color:#fff;border-radius:5px;margin-top:15px;border:none;cursor:pointer;font-weight:bold;transition:0.3s;text-decoration:none;}
+.contact-btn:hover,button:hover{background-color:#e05500;}
+form input,form textarea {width:100%;padding:10px;margin-bottom:15px;border-radius:5px;border:1px solid #ccc;font-size:1em;}
+@media screen and (max-width:768px){.projects,.games{flex-direction:column;align-items:center}header h1{font-size:2em}}
+</style>
 </head>
 <body>
 
-  <nav>
-    <a href="#about">Hakkımda</a>
-    <a href="#portfolio">Projelerim</a>
-    <a href="#games">Oyunlarım</a>
-    <a href="#contact">İletişim</a>
-  </nav>
+<nav>
+<a href="#about">Hakkımda</a>
+<a href="#portfolio">Projelerim</a>
+<a href="#games">Oyunlarım</a>
+<a href="#contact">İletişim</a>
+</nav>
 
-  <header>
-    <h1>Merhaba, Ben Yılmaz Karabulut!</h1>
-    <p>Oyun Geliştiricisi 🎮</p>
-  </header>
+<header>
+<h1>Merhaba, Ben Yılmaz Karabulut!</h1>
+<p>Oyun Geliştiricisi 🎮</p>
+</header>
 
-  <section id="about">
-    <h2>Hakkımda</h2>
-    <p>Oyun geliştirme ve web tasarım ile ilgileniyorum. HTML, CSS ve JavaScript kullanarak oyun ve web projeleri üretiyorum. Favori oyunlarım: PUBG, Brawl Stars ve Roblox.</p>
-  </section>
+<section id="about">
+<h2>Hakkımda</h2>
+<p>Oyun geliştirme ve web tasarım ile ilgileniyorum. HTML, CSS ve JavaScript kullanarak oyun ve web projeleri üretiyorum. Favori oyunlarım: PUBG, Brawl Stars ve Roblox. Her zaman yeni oyunlar öğrenmeye ve geliştirmeye açığım.</p>
+</section>
 
-  <section id="portfolio">
-    <h2>Projelerim</h2>
-    <div class="projects">
-      <div class="project">
-        <img src="https://via.placeholder.com/300x200" alt="Proje 1">
-        <h3>Proje 1</h3>
-        <p>İlk oyun geliştirme projem. Basit ama eğlenceli bir oyun.</p>
-      </div>
-      <div class="project">
-        <img src="https://via.placeholder.com/300x200" alt="Proje 2">
-        <h3>Proje 2</h3>
-        <p>Web tabanlı bir mini oyun tasarladım.</p>
-      </div>
-      <div class="project">
-        <img src="https://via.placeholder.com/300x200" alt="Proje 3">
-        <h3>Proje 3</h3>
-        <p>JavaScript ile etkileşimli oyun özellikleri ekledim.</p>
-      </div>
-    </div>
-  </section>
+<section id="portfolio">
+<h2>Projelerim</h2>
+<div class="projects">
+<div class="project">
+<img src="https://via.placeholder.com/300x200" alt="Proje 1">
+<h3>Proje 1</h3>
+<p>İlk oyun geliştirme projem. Basit ama eğlenceli bir oyun.</p>
+</div>
+<div class="project">
+<img src="https://via.placeholder.com/300x200" alt="Proje 2">
+<h3>Proje 2</h3>
+<p>Web tabanlı bir mini oyun tasarladım.</p>
+</div>
+<div class="project">
+<img src="https://via.placeholder.com/300x200" alt="Proje 3">
+<h3>Proje 3</h3>
+<p>JavaScript ile etkileşimli oyun özellikleri ekledim.</p>
+</div>
+</div>
+</section>
 
-  <section id="games">
-    <h2>Oyunlarım</h2>
-    <div class="games">
-      <div class="game">
-        <img src="https://via.placeholder.com/150x100" alt="PUBG">
-        <h3>PUBG</h3>
-      </div>
-      <div class="game">
-        <img src="https://via.placeholder.com/150x100" alt="Brawl Stars">
-        <h3>Brawl Stars</h3>
-      </div>
-      <div class="game">
-        <img src="https://via.placeholder.com/150x100" alt="Roblox">
-        <h3>Roblox</h3>
-      </div>
-    </div>
-  </section>
+<section id="games">
+<h2>Oyunlarım</h2>
+<div class="games">
+<div class="game">
+<a href="https://www.pubg.com/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/en/6/6f/PUBG_cover_art.jpg" alt="PUBG"></a>
+<h3>PUBG</h3>
+</div>
+<div class="game">
+<a href="https://supercell.com/en/games/brawlstars/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/en/8/8d/Brawl_Stars_cover.jpg" alt="Brawl Stars"></a>
+<h3>Brawl Stars</h3>
+</div>
+<div class="game">
+<a href="https://www.roblox.com/" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/en/7/77/Roblox_logo_2022.svg" alt="Roblox"></a>
+<h3>Roblox</h3>
+</div>
+</div>
+</section>
 
-  <section id="contact">
-    <h2>İletişim</h2>
-    <form action="mailto:ornek@email.com" method="post" enctype="text/plain">
-      <input type="text" name="name" placeholder="Adınız" required>
-      <input type="email" name="email" placeholder="Email" required>
-      <textarea name="message" placeholder="Mesajınız" required></textarea>
-      <button type="submit">Gönder</button>
-    </form>
-  </section>
+<section id="contact">
+<h2>İletişim</h2>
+<p>Email: <a href="mailto:yilmazkarabulut@akhisarkoleji.com" class="contact-btn">yilmazkarabulut@akhisarkoleji.com</a></p>
+<p>Telefon: <span class="contact-btn">05406122222</span></p>
+<form action="mailto:yilmazkarabulut@akhisarkoleji.com" method="post" enctype="text/plain">
+<input type="text" name="name" placeholder="Adınız" required>
+<input type="email" name="email" placeholder="Email" required>
+<textarea name="message" placeholder="Mesajınız" required></textarea>
+<button type="submit">Gönder</button>
+</form>
+</section>
 
-  <footer>
-    <p>© 2025 Yılmaz Karabulut. Tüm hakları saklıdır.</p>
-  </footer>
+<footer>
+<p>© 2025 Yılmaz Karabulut. Tüm hakları saklıdır.</p>
+</footer>
 
 </body>
 </html>
+
 
