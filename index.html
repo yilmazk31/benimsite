@@ -10,7 +10,7 @@ h1,h2,h3 { color:#0d6efd; margin:10px 0; }
 #name-screen {
   position:fixed;
   top:0; left:0; width:100%; height:100%;
-  background:#000; /* siyah arka plan */
+  background:#000;
   display:flex; flex-direction:column; justify-content:center; align-items:center;
   z-index:500; text-shadow: 2px 2px 4px #000;
 }
@@ -44,8 +44,6 @@ h1,h2,h3 { color:#0d6efd; margin:10px 0; }
   <input type="text" id="player-name-input" placeholder="İsminizi yazın">
   <button id="save-name-btn">Başla 🚀</button>
 </div>
-
-<h1>Yılmaz Karabulut Oyun</h1>
 
 <div id="game-area">
   <div id="player">😀</div>
@@ -89,19 +87,6 @@ h1,h2,h3 { color:#0d6efd; margin:10px 0; }
 
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
-
-const firebaseConfig = {
-  apiKey: "BURAYA",
-  authDomain: "BURAYA",
-  databaseURL: "BURAYA",
-  projectId: "BURAYA",
-  storageBucket: "BURAYA",
-  messagingSenderId: "BURAYA",
-  appId: "BURAYA"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
 const nameScreen=document.getElementById('name-screen');
 const playerNameInput=document.getElementById('player-name-input');
 const saveBtn=document.getElementById('save-name-btn');
@@ -117,12 +102,11 @@ const healthInner=document.getElementById('health-inner');
 const shopItems=document.querySelectorAll('.shop-item');
 const globalTable=document.getElementById('global-table');
 
-let score=0, money=100, time=0, health=100, gameActive=false, playerPos=175, keys={}, selectedHat=null, selectedOutfit=null, selectedFace=null;
+let score=0,money=100,time=0,health=100,gameActive=false,playerPos=175,keys={},selectedHat=null,selectedOutfit=null,selectedFace=null;
 let fallingObjects=[];
 
-// Başla ve isim
 saveBtn.addEventListener('click',()=>{
-  let val=playerNameInput.value.trim();
+  const val=playerNameInput.value.trim();
   if(!val){ alert('Lütfen isim girin!'); return; }
   window.playerName=val;
   nameScreen.style.display='none';
@@ -153,7 +137,7 @@ shopItems.forEach(item=>{
       if(type==='outfit') selectedOutfit='👕';
       if(type==='face') selectedFace='😎';
       moneyDisplay.textContent=money;
-      player.textContent = (selectedHat||'') + (selectedOutfit||'') + (selectedFace||'') + '😀';
+      player.textContent=(selectedHat||'')+(selectedOutfit||'')+(selectedFace||'')+'😀';
     }
   });
 });
@@ -162,7 +146,7 @@ shopItems.forEach(item=>{
 function startGame(){
   score=0; time=0; health=100; gameActive=true; playerPos=175;
   player.style.left=playerPos+'px';
-  player.textContent = (selectedHat||'') + (selectedOutfit||'') + (selectedFace||'') + '😀';
+  player.textContent=(selectedHat||'')+(selectedOutfit||'')+(selectedFace||'')+'😀';
   scoreDisplay.textContent=score; moneyDisplay.textContent=money; timeDisplay.textContent=time;
   healthInner.style.width='100%';
   fallingObjects.forEach(o=>o.remove()); fallingObjects=[];
