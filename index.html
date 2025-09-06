@@ -9,8 +9,7 @@ body { margin:0; font-family:Arial,sans-serif; background:#000; color:#fff; text
 h1,h2,h3 { color:#0d6efd; }
 #name-screen { position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:500; }
 #name-screen input { padding:10px; font-size:16px; margin-top:10px; }
-#start-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); color:#fff; display:flex; flex-direction:column; justify-content:center; align-items:center; font-size:2em; z-index:600; cursor:pointer; }
-#start-overlay h2 { color:#fff; margin-bottom:20px; }
+#start-btn { margin-top:10px; padding:10px 20px; background:#0d6efd; color:#fff; border:none; border-radius:5px; cursor:pointer; font-size:18px; }
 #game-area { position:relative; width:90%; max-width:400px; height:400px; background:#111; border:2px solid #0d6efd; margin:20px auto; overflow:hidden; border-radius:10px; }
 #player { position:absolute; bottom:10px; left:175px; width:50px; height:50px; border-radius:50%; transition:left 0.05s linear; background:lime; display:flex; justify-content:center; align-items:center; font-size:24px; }
 .falling { position:absolute; top:0; width:30px; height:30px; border-radius:50%; }
@@ -35,11 +34,7 @@ h1,h2,h3 { color:#0d6efd; }
 <div id="name-screen">
   <h2>YılmazK Oyun</h2>
   <input type="text" id="player-name-input" placeholder="İsminizi yazın">
-</div>
-
-<div id="start-overlay">
-  <h2>🎮 Başlamak için tıklayın / dokunun</h2>
-  <button id="start-btn" style="padding:10px 20px; font-size:18px; cursor:pointer;">Başla</button>
+  <button id="start-btn">Başla</button>
 </div>
 
 <h1>Yılmaz Karabulut Oyun</h1>
@@ -92,7 +87,6 @@ const db=firebase.database();
 
 const playerNameInput=document.getElementById('player-name-input');
 const startBtn=document.getElementById('start-btn');
-const startOverlay=document.getElementById('start-overlay');
 const restartBtn=document.getElementById('restart-btn');
 const gameOverlay=document.getElementById('game-overlay');
 const overlayMessage=document.getElementById('overlay-message');
@@ -126,36 +120,33 @@ function startGame(){
   scoreDisplay.textContent=score; moneyDisplay.textContent=money; timeDisplay.textContent=time;
   healthInner.style.width='100%';
   fallingObjects.forEach(o=>o.remove()); fallingObjects=[];
+  updatePlayerAppearance();
+  document.getElementById('name-screen').style.display='none';
   requestAnimationFrame(gameLoop);
-  startOverlay.style.display='none';
 }
 
-startBtn.addEventListener('click',e=>{
-  e.preventDefault();
+startBtn.addEventListener('click',()=>{
   window.playerName=playerNameInput.value.trim()||'Oyuncu';
   loadPlayerData(window.playerName,startGame);
 });
 
-restartBtn.addEventListener('click',()=>{ gameOverlay.style.display='none'; startGame(); });
+// Klavye ve mobil kontroller
+document.addEventListener('keydown',e=>{ if(gameActive) keys[e.key.toLowerCase()]=true; });
+document.addEventListener('keyup',e=>{ if(gameActive) keys[e.key.toLowerCase()]=false; });
+document.getElementById('left-btn').addEventListener('touchstart',()=>{ if(gameActive) keys['a']=true; });
+document.getElementById('left-btn').addEventListener('touchend',()=>{ if(gameActive) keys['a']=false; });
+document.getElementById('right-btn').addEventListener('touchstart',()=>{ if(gameActive) keys['d']=true; });
+document.getElementById('right-btn').addEventListener('touchend',()=>{ if(gameActive) keys['d']=false; });
 
-document.addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; });
-document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
-document.getElementById('left-btn').addEventListener('touchstart',()=>{ keys['a']=true; });
-document.getElementById('left-btn').addEventListener('touchend',()=>{ keys['a']=false; });
-document.getElementById('right-btn').addEventListener('touchstart',()=>{ keys['d']=true; });
-document.getElementById('right-btn').addEventListener('touchend',()=>{ keys['d']=false; });
-
+// Shop
 shopItems.forEach(item=>{
   item.addEventListener('click',()=>{
     const cost=parseInt(item.dataset.cost), type=item.dataset.type;
-    if(money>=cost){ money-=cost;
-      if(type==='hat') selectedHat='🎩';
-      if(type==='outfit') selectedOutfit='👕';
-      if(type==='face') selectedFace='😎';
-      moneyDisplay.textContent=money; updatePlayerAppearance(); savePlayerData(window.playerName);
-    }
+    if(money>=cost){ money-=cost; if(type==='hat') selectedHat='🎩'; if(type==='outfit') selectedOutfit='👕'; if(type==='face') selectedFace='😎'; moneyDisplay.textContent=money; updatePlayerAppearance(); savePlayerData(window.playerName); }
   });
 });
+
+restartBtn.addEventListener('click',()=>{ gameOverlay.style.display='none'; startGame(); });
 
 function spawnObject(){ const obj=document.createElement('div'); obj.classList.add('falling'); obj.style.left=Math.random()*370+'px'; obj.style.top='0px';
   const r=Math.random(); if(r<0.55)obj.classList.add('coin'); else if(r<0.85)obj.classList.add('enemy'); else if(r<0.95)obj.classList.add('bonus'); else obj.classList.add('heart');
@@ -193,7 +184,6 @@ function updateGlobalScore(playerName,score){
     globalTable.innerHTML=html;
   });
 }
-});
 </script>
 </body>
 </html>
