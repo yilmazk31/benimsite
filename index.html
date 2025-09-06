@@ -101,6 +101,7 @@ section{padding:60px 20px;max-width:1000px;margin:0 auto;}
 </section>
 
 <script>
+// Temel değişkenler
 const player=document.getElementById('player');
 const gameArea=document.getElementById('game-area');
 const scoreDisplay=document.getElementById('score-display');
@@ -116,6 +117,12 @@ const restartBtn=document.getElementById('restart-btn');
 let score=0,money=100,time=30,health=100,gameActive=false,fallingObjects=[],playerSpeed=5;
 let leftPressed=false,rightPressed=false,currentCostume='red';
 
+// Sesler
+const coinSound=new Audio('https://freesound.org/data/previews/256/256113_3263906-lq.mp3');
+const hitSound=new Audio('https://freesound.org/data/previews/109/109662_945474-lq.mp3');
+const gameOverSound=new Audio('https://freesound.org/data/previews/331/331912_3248244-lq.mp3');
+
+// Kostüm fonksiyonları
 function applyCostume(){
 if(currentCostume=='mavi kostüm') player.style.background='blue';
 else if(currentCostume=='yeşil kostüm') player.style.background='green';
@@ -124,29 +131,25 @@ else if(currentCostume=='mor kostüm') player.style.background='purple';
 else if(currentCostume=='şapka') player.style.background='red';
 else player.style.background='red';
 }
-
 function buyCostume(item){
 const cost=parseInt(item.dataset.cost);
 if(cost<=money){item.classList.remove('locked');currentCostume=item.textContent.split('-')[0].trim().toLowerCase();applyCostume();}
 else alert('Yeterli paranız yok!');
 }
-
 function selectCostume(name){currentCostume=name;applyCostume();}
 
-function startGame(){
-gameActive=true;overlay.style.display='none';
+// Oyunu başlat/durdur
+function startGame(){gameActive=true;overlay.style.display='none';
 score=0;money=100;time=30;health=100;
 scoreDisplay.textContent=score;moneyDisplay.textContent=money;timeDisplay.textContent=time;healthInner.style.width='100%';
 fallingObjects.forEach(obj=>obj.remove());fallingObjects=[];
 spawnFallingObject();spawnDangerObject();
-requestAnimationFrame(movePlayer);
-startTimer();
+requestAnimationFrame(movePlayer);startTimer();
 }
-
 function stopGame(){gameActive=false;overlay.style.display='flex';overlayMessage.textContent='Oyun Durduruldu ⏸️';fallingObjects.forEach(obj=>obj.remove());fallingObjects=[];}
-
 function restartGame(){overlay.style.display='none';startGame();}
 
+// Hareket kontrolleri
 document.addEventListener('keydown',e=>{
 if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') leftPressed=true;
 if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') rightPressed=true;
@@ -155,7 +158,6 @@ document.addEventListener('keyup',e=>{
 if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') leftPressed=false;
 if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') rightPressed=false;
 });
-
 const leftBtn=document.getElementById('left-btn');
 const rightBtn=document.getElementById('right-btn');
 leftBtn.addEventListener('touchstart',()=>{leftPressed=true;});
@@ -163,6 +165,7 @@ leftBtn.addEventListener('touchend',()=>{leftPressed=false;});
 rightBtn.addEventListener('touchstart',()=>{rightPressed=true;});
 rightBtn.addEventListener('touchend',()=>{rightPressed=false;});
 
+// Oyuncu hareketi
 function movePlayer(){
 if(!gameActive) return;
 let left=parseInt(player.style.left || 175);
@@ -172,7 +175,7 @@ player.style.left=left+'px';
 requestAnimationFrame(movePlayer);
 }
 
-// Falling coins/objects
+// Düşen para
 function spawnFallingObject(){
 if(!gameActive) return;
 const obj=document.createElement('div');
@@ -182,7 +185,6 @@ gameArea.appendChild(obj); fallingObjects.push(obj);
 moveFallingObject(obj);
 setTimeout(spawnFallingObject,1500);
 }
-
 function moveFallingObject(obj){
 if(!gameActive) return;
 let top=parseInt(obj.style.top);
@@ -192,7 +194,7 @@ top+=2;obj.style.top=top+'px';
 const playerRect=player.getBoundingClientRect();
 const objRect=obj.getBoundingClientRect();
 if(!(playerRect.right<objRect.left||playerRect.left>objRect.right||playerRect.bottom<objRect.top||playerRect.top>objRect.bottom)){
-score+=10;money+=5;
+score+=10;money+=5;coinSound.play();
 scoreDisplay.textContent=score;moneyDisplay.textContent=money;
 obj.remove();clearInterval(interval);
 }
@@ -200,7 +202,7 @@ if(top>gameArea.offsetHeight){obj.remove();clearInterval(interval);}
 },30);
 }
 
-// Danger objects
+// Düşman
 function spawnDangerObject(){
 if(!gameActive) return;
 const obj=document.createElement('div');
@@ -210,7 +212,6 @@ gameArea.appendChild(obj); fallingObjects.push(obj);
 moveDangerObject(obj);
 setTimeout(spawnDangerObject,3000);
 }
-
 function moveDangerObject(obj){
 if(!gameActive) return;
 let top=parseInt(obj.style.top);
@@ -220,15 +221,21 @@ top+=3;obj.style.top=top+'px';
 const playerRect=player.getBoundingClientRect();
 const objRect=obj.getBoundingClientRect();
 if(!(playerRect.right<objRect.left||playerRect.left>objRect.right||playerRect.bottom<objRect.top||playerRect.top>objRect.bottom)){
-health-=20;healthInner.style.width=health+'%';obj.remove();clearInterval(interval);
+health-=20;hitSound.play();healthInner.style.width=health+'%';obj.remove();clearInterval(interval);
 if(health<=0) endGame(false);
 }
 if(top>gameArea.offsetHeight){obj.remove();clearInterval(interval);}
 },30);
 }
 
-function endGame(win=false){gameActive=false;overlay.style.display='flex';overlayMessage.textContent=win?'Kazandınız 🎉':'Kaybettiniz 😢';fallingObjects.forEach(obj=>obj.remove());fallingObjects=[];}
+// Oyun bitişi
+function endGame(win=false){gameActive=false;overlay.style.display='flex';
+overlayMessage.textContent=win?'Kazandınız 🎉':'Kaybettiniz 😢';
+fallingObjects.forEach(obj=>obj.remove());fallingObjects=[];gameOverSound.play();
+player.style.transition='transform 0.5s';player.style.transform='translateY(100px) rotate(360deg)';setTimeout(()=>{player.style.transform='translateY(0px) rotate(0deg)';player.style.transition='none';},500);
+}
 
+// Sayaç
 function startTimer(){
 let interval=setInterval(()=>{
 if(!gameActive){clearInterval(interval);return;}
@@ -237,6 +244,7 @@ if(time<=0||health<=0){endGame(false);clearInterval(interval);}
 },1000);
 }
 
+// Butonlar
 startBtn.addEventListener('click',startGame);
 stopBtn.addEventListener('click',stopGame);
 restartBtn.addEventListener('click',restartGame);
