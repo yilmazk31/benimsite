@@ -26,8 +26,8 @@ section{padding:60px 20px;max-width:1000px;margin:0 auto;}
 #mobile-controls{display:none;text-align:center;margin-top:10px;position:fixed;bottom:10px;width:100%;justify-content:center;gap:10px;}
 .health-bar{width:100%;background:#555;height:20px;border-radius:10px;margin-bottom:10px;overflow:hidden;}
 .health-inner{width:100%;height:100%;background:red;}
-.scoreboard{display:flex;justify-content:space-between;align-items:center;max-width:400px;margin:10px auto;}
-#players-table{color:#fff;border:2px solid #0d6efd;border-collapse:collapse;}
+.scoreboard{display:flex;justify-content:space-between;align-items:flex-start;max-width:1000px;margin:10px auto;gap:20px;flex-wrap:wrap;}
+#players-table{color:#fff;border:2px solid #0d6efd;border-collapse:collapse;width:200px;}
 #players-table th,#players-table td{border:1px solid #0d6efd;padding:5px;text-align:center;}
 @media(max-width:500px){#game-area{height:300px;}#player{width:40px;height:40px;}#mobile-controls{display:flex;}}
 </style>
@@ -63,10 +63,7 @@ section{padding:60px 20px;max-width:1000px;margin:0 auto;}
 <section id="mini-game">
 <h2>Mini Oyun</h2>
 <div class="scoreboard">
-<div>Oyuncu: Yılmaz Karabulut</div>
-<div>Dünya Sıralaması:</div>
-</div>
-<div id="mini-game-container">
+<div id="game-area-container">
 <div id="game-area">
 <div id="player"></div>
 <div id="game-overlay">
@@ -74,7 +71,7 @@ section{padding:60px 20px;max-width:1000px;margin:0 auto;}
 <button id="restart-btn">Yeniden Başlat</button>
 </div>
 <div class="health-bar"><div id="health-inner" class="health-inner"></div></div>
-<p>Puan: <span id="score-display">0</span> | Para: <span id="money-display">100</span> | Kalan Süre: <span id="time-display">30</span>s</p>
+<p>Puan: <span id="score-display">0</span> | Para: <span id="money-display">100</span> | Zaman: <span id="time-display">0</span>s</p>
 <div id="control-buttons">
 <button id="start-btn" class="control-btn">Oyunu Başlat</button>
 <button id="stop-btn" class="control-btn">Oyunu Durdur</button>
@@ -84,8 +81,9 @@ section{padding:60px 20px;max-width:1000px;margin:0 auto;}
 <button id="right-btn" class="control-btn">➡️</button>
 </div>
 </div>
+</div>
 
-<div>
+<div id="players-table-container">
 <h3>Oyuncular Tablosu</h3>
 <table id="players-table">
 <tr><th>Sıra</th><th>İsim</th><th>Puan</th></tr>
@@ -116,7 +114,7 @@ section{padding:60px 20px;max-width:1000px;margin:0 auto;}
 </section>
 
 <script>
-// Temel değişkenler
+// --- Değişkenler ---
 const player=document.getElementById('player');
 const gameArea=document.getElementById('game-area');
 const scoreDisplay=document.getElementById('score-display');
@@ -129,15 +127,15 @@ const startBtn=document.getElementById('start-btn');
 const stopBtn=document.getElementById('stop-btn');
 const restartBtn=document.getElementById('restart-btn');
 
-let score=0,money=100,time=30,health=100,gameActive=false,fallingObjects=[],playerSpeed=5;
+let score=0,money=100,time=0,health=100,gameActive=false,fallingObjects=[],playerSpeed=5,difficultyMultiplier=1;
 let leftPressed=false,rightPressed=false,currentCostume='red';
 
-// Sesler
+// --- Sesler ---
 const coinSound=new Audio('https://freesound.org/data/previews/256/256113_3263906-lq.mp3');
-const hitSound=new Audio('https://www.soundjay.com/button/beep-07.mp3'); // örnek hasar sesi
+const hitSound=new Audio('https://www.soundjay.com/button/beep-07.mp3'); // hasar yeme sesi örnek
 const gameOverSound=new Audio('https://freesound.org/data/previews/331/331912_3248244-lq.mp3');
 
-// Kostüm fonksiyonları
+// --- Kostümler ---
 function applyCostume(){
 if(currentCostume=='mavi kostüm') player.style.background='blue';
 else if(currentCostume=='yeşil kostüm') player.style.background='green';
@@ -153,18 +151,20 @@ else alert('Yeterli paranız yok!');
 }
 function selectCostume(name){currentCostume=name;applyCostume();}
 
-// Oyunu başlat/durdur
-function startGame(){gameActive=true;overlay.style.display='none';
-score=0;money=100;time=30;health=100;
+// --- Oyunu başlat/durdur ---
+function startGame(){
+gameActive=true;overlay.style.display='none';
+score=0;money=100;time=0;health=100;difficultyMultiplier=1;
 scoreDisplay.textContent=score;moneyDisplay.textContent=money;timeDisplay.textContent=time;healthInner.style.width='100%';
 fallingObjects.forEach(obj=>obj.remove());fallingObjects=[];
 spawnFallingObject();spawnDangerObject();
-requestAnimationFrame(movePlayer);startTimer();
+requestAnimationFrame(movePlayer);
+startTimer();
 }
 function stopGame(){gameActive=false;overlay.style.display='flex';overlayMessage.textContent='Oyun Durduruldu ⏸️';fallingObjects.forEach(obj=>obj.remove());fallingObjects=[];}
 function restartGame(){overlay.style.display='none';startGame();}
 
-// Hareket kontrolleri
+// --- Hareket kontrolleri ---
 document.addEventListener('keydown',e=>{
 if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') leftPressed=true;
 if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') rightPressed=true;
@@ -173,14 +173,12 @@ document.addEventListener('keyup',e=>{
 if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A') leftPressed=false;
 if(e.key==='ArrowRight'||e.key==='d'||e.key==='D') rightPressed=false;
 });
-const leftBtn=document.getElementById('left-btn');
-const rightBtn=document.getElementById('right-btn');
-leftBtn.addEventListener('touchstart',()=>{leftPressed=true;});
-leftBtn.addEventListener('touchend',()=>{leftPressed=false;});
-rightBtn.addEventListener('touchstart',()=>{rightPressed=true;});
-rightBtn.addEventListener('touchend',()=>{rightPressed=false;});
+document.getElementById('left-btn').addEventListener('touchstart',()=>{leftPressed=true;});
+document.getElementById('left-btn').addEventListener('touchend',()=>{leftPressed=false;});
+document.getElementById('right-btn').addEventListener('touchstart',()=>{rightPressed=true;});
+document.getElementById('right-btn').addEventListener('touchend',()=>{rightPressed=false;});
 
-// Oyuncu hareketi
+// --- Oyuncu hareketi ---
 function movePlayer(){
 if(!gameActive) return;
 let left=parseInt(player.style.left || 175);
@@ -190,7 +188,7 @@ player.style.left=left+'px';
 requestAnimationFrame(movePlayer);
 }
 
-// Düşen para
+// --- Para düşme ---
 function spawnFallingObject(){
 if(!gameActive) return;
 const obj=document.createElement('div');
@@ -198,14 +196,14 @@ obj.style.left=Math.floor(Math.random()*(gameArea.offsetWidth-20))+'px';
 obj.style.top='0px'; obj.style.width='20px'; obj.style.height='20px'; obj.style.background='yellow'; obj.style.position='absolute'; obj.style.borderRadius='50%';
 gameArea.appendChild(obj); fallingObjects.push(obj);
 moveFallingObject(obj);
-setTimeout(spawnFallingObject,1500);
+setTimeout(spawnFallingObject,1500/difficultyMultiplier);
 }
 function moveFallingObject(obj){
 if(!gameActive) return;
 let top=parseInt(obj.style.top);
 const interval=setInterval(()=>{
 if(!gameActive){clearInterval(interval);obj.remove();return;}
-top+=2;obj.style.top=top+'px';
+top+=2*difficultyMultiplier; obj.style.top=top+'px';
 const playerRect=player.getBoundingClientRect();
 const objRect=obj.getBoundingClientRect();
 if(!(playerRect.right<objRect.left||playerRect.left>objRect.right||playerRect.bottom<objRect.top||playerRect.top>objRect.bottom)){
@@ -217,7 +215,7 @@ if(top>gameArea.offsetHeight){obj.remove();clearInterval(interval);}
 },30);
 }
 
-// Düşman
+// --- Düşman ---
 function spawnDangerObject(){
 if(!gameActive) return;
 const obj=document.createElement('div');
@@ -225,41 +223,38 @@ obj.style.left=Math.floor(Math.random()*(gameArea.offsetWidth-20))+'px';
 obj.style.top='0px'; obj.style.width='20px'; obj.style.height='20px'; obj.style.background='purple'; obj.style.position='absolute'; obj.style.borderRadius='50%';
 gameArea.appendChild(obj); fallingObjects.push(obj);
 moveDangerObject(obj);
-setTimeout(spawnDangerObject,3000);
+setTimeout(spawnDangerObject,3000/difficultyMultiplier);
 }
 function moveDangerObject(obj){
 if(!gameActive) return;
 let top=parseInt(obj.style.top);
 const interval=setInterval(()=>{
 if(!gameActive){clearInterval(interval);obj.remove();return;}
-top+=3;obj.style.top=top+'px';
+top+=3*difficultyMultiplier; obj.style.top=top+'px';
 const playerRect=player.getBoundingClientRect();
 const objRect=obj.getBoundingClientRect();
 if(!(playerRect.right<objRect.left||playerRect.left>objRect.right||playerRect.bottom<objRect.top||playerRect.top>objRect.bottom)){
-health-=20;hitSound.play();healthInner.style.width=health+'%';obj.remove();clearInterval(interval);
-if(health<=0) endGame(false);
+health-=20;hitSound.play();
+healthInner.style.width=health+'%';
+obj.remove();clearInterval(interval);
+if(health<=0){gameOver();}
 }
 if(top>gameArea.offsetHeight){obj.remove();clearInterval(interval);}
 },30);
 }
 
-// Oyun bitişi
-function endGame(win=false){gameActive=false;overlay.style.display='flex';
-overlayMessage.textContent=win?'Kazandınız 🎉':'Kaybettiniz 😢';
-fallingObjects.forEach(obj=>obj.remove());fallingObjects=[];gameOverSound.play();
-player.style.transition='transform 0.5s';player.style.transform='translateY(100px) rotate(360deg)';setTimeout(()=>{player.style.transform='translateY(0px) rotate(0deg)';player.style.transition='none';},500);
-}
-
-// Sayaç
+// --- Zaman ---
 function startTimer(){
-let interval=setInterval(()=>{
-if(!gameActive){clearInterval(interval);return;}
-time--;timeDisplay.textContent=time;
-if(time<=0||health<=0){endGame(false);clearInterval(interval);}
-},1000);
+if(!gameActive) return;
+time++;timeDisplay.textContent=time;
+difficultyMultiplier+=0.01; // zamanla hızlanıyor
+setTimeout(startTimer,1000);
 }
 
-// Butonlar
+// --- Oyun bitti ---
+function gameOver(){overlay.style.display='flex';overlayMessage.textContent='Kaybettiniz 😢';gameActive=false;fallingObjects.forEach(obj=>obj.remove());fallingObjects=[];gameOverSound.play();}
+
+// --- Butonlar ---
 startBtn.addEventListener('click',startGame);
 stopBtn.addEventListener('click',stopGame);
 restartBtn.addEventListener('click',restartGame);
@@ -267,5 +262,3 @@ restartBtn.addEventListener('click',restartGame);
 
 </body>
 </html>
-
-
