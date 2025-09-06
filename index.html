@@ -11,7 +11,7 @@ body {margin:0; font-family:'Roboto',sans-serif; background:#1e1e1e; color:#fff;
 .dark-mode {background:#1e1e1e; color:#fff;}
 .light-mode {background:#f5f5f5; color:#111;}
 nav {position:fixed; top:0; width:100%; background:#0d6efd; padding:15px; text-align:center; z-index:100;}
-nav a {margin:0 20px; color:#fff; text-decoration:none; font-weight:bold; transition:0.3s;}
+nav a {margin:0 15px; color:#fff; text-decoration:none; font-weight:bold; transition:0.3s;}
 nav a:hover {text-decoration:underline;}
 header {text-align:center; padding:150px 20px 100px 20px; position:relative; overflow:hidden;}
 header h1 {margin:0; font-size:3em; animation:fadeIn 2s ease-in-out;}
@@ -41,12 +41,14 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 .project:hover .tooltip,.game:hover .tooltip,.skill:hover .tooltip {opacity:1;}
 @media screen and (max-width:768px){.projects,.games,.skills,.blog,.contact-container{flex-direction:column;align-items:center}header h1{font-size:2em}}
 /* Mini Oyun Stil */
-#game-area {position:relative; width:300px; height:300px; background:#111; border:2px solid #0d6efd; margin:0 auto; overflow:hidden;}
-#star {position:absolute; width:30px; height:30px; background:yellow; border-radius:50%; cursor:pointer;}
+#game-area {position:relative; width:400px; height:400px; background:#111; border:2px solid #0d6efd; margin:0 auto; overflow:hidden;}
+#player {position:absolute; width:50px; height:50px; background:red; bottom:0; left:175px; border-radius:5px;}
+.star {position:absolute; width:30px; height:30px; background:yellow; border-radius:50%;}
 </style>
 </head>
 <body class="dark-mode">
 
+<!-- Navbar -->
 <nav>
 <a href="#about">Hakkımda</a>
 <a href="#portfolio">Projelerim</a>
@@ -57,16 +59,24 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 <a href="#contact">İletişim</a>
 </nav>
 
+<!-- Header -->
 <header id="header">
 <h1>Merhaba, Ben Yılmaz Karabulut!</h1>
 <p>Oyun Geliştirici 🎮</p>
 </header>
 
+<!-- Bölüm ayırıcı mavi şerit -->
+<section style="width:100%; height:50px; background:#0d6efd; display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.2em; margin-bottom:40px;">
+Merhaba, ben Yılmaz Karabulut
+</section>
+
+<!-- Hakkımda -->
 <section id="about">
 <h2>Hakkımda</h2>
 <p>Oyun geliştirme ve web tasarım ile ilgileniyorum. HTML, CSS, JavaScript kullanarak oyun ve web projeleri üretiyorum. Favori oyunlarım: PUBG, Brawl Stars ve Roblox. Her zaman yeni oyunlar öğrenmeye ve geliştirmeye açığım.</p>
 </section>
 
+<!-- Projeler -->
 <section id="portfolio">
 <h2>Projelerim</h2>
 <div class="projects">
@@ -91,6 +101,7 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 </div>
 </section>
 
+<!-- Oyunlar -->
 <section id="games">
 <h2>Oyunlarım</h2>
 <div class="games">
@@ -115,6 +126,7 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 </div>
 </section>
 
+<!-- Yetenekler -->
 <section id="skills">
 <h2>Yeteneklerim</h2>
 <div class="skills">
@@ -126,6 +138,7 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 </div>
 </section>
 
+<!-- Blog -->
 <section id="blog">
 <h2>Blog / Günlük</h2>
 <div class="blog">
@@ -135,15 +148,17 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 </div>
 </section>
 
-<!-- Mini Oyun Bölümü -->
+<!-- Yeni Gelişmiş Mini Oyun -->
 <section id="mini-game">
-<h2>Mini Oyun: Yıldızı Yakala!</h2>
-<p>Puan: <span id="score">0</span></p>
+<h2>Mini Oyun: Düşen Yıldızları Yakala!</h2>
+<p>Seviye: <span id="level">1</span> | Puan: <span id="score">0</span> | Kalan Süre: <span id="time">30</span>s</p>
 <div id="game-area">
-  <div id="star"></div>
+  <div id="player"></div>
 </div>
+<p id="game-message" style="text-align:center; font-size:1.2em; color:#ff0; margin-top:15px;"></p>
 </section>
 
+<!-- İletişim -->
 <section id="contact">
 <h2>İletişim</h2>
 <div class="contact-container">
@@ -159,6 +174,7 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 </form>
 </section>
 
+<!-- Modal -->
 <div id="modal" class="modal">
 <div class="modal-content">
 <span class="close" onclick="closeModal()">&times;</span>
@@ -166,12 +182,15 @@ footer {background:#0d6efd; color:#fff; text-align:center; padding:20px;}
 </div>
 </div>
 
+<!-- Footer -->
 <footer>
 <p>© 2025 Yılmaz Karabulut. Tüm hakları saklıdır.</p>
 </footer>
 
+<!-- Toggle Mode -->
 <button class="toggle-mode" onclick="toggleMode()">Light / Dark Mode</button>
 
+<!-- JS -->
 <script>
 // Modal fonksiyonları
 function openModal(content){
@@ -180,7 +199,7 @@ function openModal(content){
 }
 function closeModal(){ document.getElementById('modal').style.display = 'none'; }
 
-// Header parallax efekti
+// Header parallax
 window.addEventListener('scroll', function(){
     const header = document.getElementById('header');
     header.style.backgroundPositionY = window.scrollY * 0.5 + 'px';
@@ -202,26 +221,88 @@ window.addEventListener('load', ()=>{
 });
 
 // Mini Oyun JS
-const star = document.getElementById('star');
+const player = document.getElementById('player');
 const gameArea = document.getElementById('game-area');
 const scoreDisplay = document.getElementById('score');
+const levelDisplay = document.getElementById('level');
+const timeDisplay = document.getElementById('time');
+const message = document.getElementById('game-message');
+
 let score = 0;
+let level = 1;
+let time = 30;
+let speed = 2;
+let gameInterval, fallingInterval;
 
-function randomPosition(){
-    const x = Math.floor(Math.random() * (gameArea.clientWidth - 30));
-    const y = Math.floor(Math.random() * (gameArea.clientHeight - 30));
-    star.style.left = x + 'px';
-    star.style.top = y + 'px';
-}
-
-star.addEventListener('click', () => {
-    score++;
-    scoreDisplay.textContent = score;
-    randomPosition();
+// Oyuncu hareketi
+document.addEventListener('mousemove', (e)=>{
+  const rect = gameArea.getBoundingClientRect();
+  let x = e.clientX - rect.left - player.offsetWidth/2;
+  if(x < 0) x=0;
+  if(x > gameArea.clientWidth - player.offsetWidth) x = gameArea.clientWidth - player.offsetWidth;
+  player.style.left = x + 'px';
 });
 
-// Başlangıç pozisyonu
-randomPosition();
+// Yeni yıldız oluştur
+function createStar(){
+  const star = document.createElement('div');
+  star.classList.add('star');
+  star.style.top = '0px';
+  star.style.left = Math.floor(Math.random() * (gameArea.clientWidth-30)) + 'px';
+  gameArea.appendChild(star);
+
+  let starFall = setInterval(()=>{
+    let y = parseInt(star.style.top);
+    y += speed;
+    star.style.top = y + 'px';
+
+    // Çarpma kontrolü
+    const playerRect = player.getBoundingClientRect();
+    const starRect = star.getBoundingClientRect();
+    if(!(playerRect.right < starRect.left || playerRect.left > starRect.right || playerRect.bottom < starRect.top || playerRect.top > starRect.bottom)){
+      score++;
+      scoreDisplay.textContent = score;
+      gameArea.removeChild(star);
+      clearInterval(starFall);
+
+      if(score % 5 === 0 && level < 10){
+        level++;
+        levelDisplay.textContent = level;
+        speed += 1;
+      }
+      if(level === 10 && score >= 50){
+        endGame(true);
+      }
+    }
+
+    if(y > gameArea.clientHeight){
+      gameArea.removeChild(star);
+      clearInterval(starFall);
+    }
+  }, 20);
+}
+
+// Oyun Başlat
+function startGame(){
+  gameInterval = setInterval(()=>{ createStar(); }, 1000);
+  fallingInterval = setInterval(()=>{
+    time--;
+    timeDisplay.textContent = time;
+    if(time <= 0){
+      endGame(false);
+    }
+  }, 1000);
+}
+
+// Oyun bitir
+function endGame(win){
+  clearInterval(gameInterval);
+  clearInterval(fallingInterval);
+  document.querySelectorAll('.star').forEach(s=>s.remove());
+  message.textContent = win ? "🎉 Tebrikler! Oyunu tamamladınız!" : "😢 Süre doldu! Tekrar deneyin.";
+}
+
+startGame();
 </script>
 
 </body>
