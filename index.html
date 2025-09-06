@@ -8,21 +8,23 @@
 body{margin:0;font-family:sans-serif;background:#000;color:#fff;text-align:center;}
 h1,h2{color:#0d6efd;}
 #name-screen{position:fixed;top:0;left:0;width:100%;height:100%;background:#111;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:500;}
-#name-screen input,#name-screen button{padding:10px;margin:5px;}
+#name-screen input,#name-screen button{padding:10px;margin:5px;font-size:16px;border-radius:5px;}
+#name-card{margin-top:10px;padding:5px 10px;background:#222;border:1px solid #0d6efd;border-radius:5px;display:none;}
 #game-area{position:relative;width:90%;max-width:400px;height:400px;margin:20px auto;background:#222;border:2px solid #0d6efd;border-radius:10px;overflow:hidden;}
-#player{position:absolute;bottom:10px;left:175px;width:50px;height:50px;border-radius:50%;background:lime;display:flex;justify-content:center;align-items:center;font-size:24px;}
+#player{position:absolute;bottom:10px;left:175px;width:50px;height:50px;border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:24px;transition:left 0.05s linear;}
 .falling{position:absolute;top:0;width:30px;height:30px;border-radius:50%;}
 .coin{background:gold;box-shadow:0 0 10px gold;}
 .enemy{background:red;box-shadow:0 0 10px red;}
 .heart{background:red;box-shadow:0 0 10px pink;}
-.health-bar{width:90%;max-width:400px;height:20px;background:#555;margin:10px auto;border-radius:10px;}
-.health-inner{width:100%;height:100%;background:red;border-radius:10px;}
+.health-bar{width:90%;max-width:400px;height:20px;background:#555;margin:10px auto;border-radius:10px;overflow:hidden;}
+.health-inner{width:100%;height:100%;background:lime;transition:width 0.3s linear;}
 #game-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);color:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;font-size:2em;border-radius:10px;display:none;z-index:100;}
 #mobile-controls{display:flex;justify-content:center;gap:20px;margin-top:10px;}
 .mobile-btn{width:60px;height:60px;font-size:24px;border:none;border-radius:50%;background:#0d6efd;color:#fff;cursor:pointer;}
 #shop{margin:20px auto;width:90%;max-width:400px;background:#333;padding:10px;border-radius:10px;}
 .shop-item{display:inline-block;margin:5px;padding:5px 10px;background:#0d6efd;border-radius:5px;cursor:pointer;}
-#info{margin:20px;padding:10px;background:#111;border:1px solid #0d6efd;border-radius:10px;text-align:left;}
+#shop-toggle{margin-top:5px;padding:5px 10px;background:#0d6efd;border:none;border-radius:5px;color:#fff;cursor:pointer;}
+#color-picker{margin-top:5px;}
 #global-table{margin:10px auto;width:90%;max-width:400px;border-collapse:collapse;}
 #global-table th,#global-table td{border:1px solid #0d6efd;padding:5px;color:#fff;}
 </style>
@@ -33,6 +35,7 @@ h1,h2{color:#0d6efd;}
 <h2>Yılmaz Oyun</h2>
 <input type="text" id="player-name-input" placeholder="İsminizi yazın">
 <button id="save-name-btn">Başla</button>
+<div id="name-card"></div>
 <p>10. sınıf, 15 yaş, hobiler: oyun oynamak ve gezmek</p>
 </div>
 
@@ -46,26 +49,20 @@ h1,h2{color:#0d6efd;}
 </div>
 
 <div class="health-bar"><div id="health-inner"></div></div>
-<p>Puan: <span id="score-display">0</span> | Para: <span id="money-display">100</span></p>
+<p>Puan: <span id="score-display">0</span> | Para: <span id="money-display">0</span></p>
 
 <div id="mobile-controls">
 <button id="left-btn" class="mobile-btn">◀</button>
 <button id="right-btn" class="mobile-btn">▶</button>
 </div>
 
-<div id="shop">
+<button id="shop-toggle">Dükkan Aç/Kapat</button>
+<div id="shop" style="display:none;">
 <h3>Dükkan</h3>
 <div class="shop-item" data-cost="50" data-type="hat">Şapka - 50</div>
 <div class="shop-item" data-cost="100" data-type="outfit">Elbise - 100</div>
 <div class="shop-item" data-cost="150" data-type="face">Yüz - 150</div>
-</div>
-
-<div id="info">
-<h3>Oyun Bilgisi</h3>
-<p>PC: A/D tuşları, Mobil: ◀ ▶ tuşları</p>
-<p>Coin toplayın, düşmanlardan kaçın, bonusları ve kalpleri yakalayın.</p>
-<p>Instagram: <a href="https://www.instagram.com/ykk388?igsh=bm5pM3lub3liNzl2&utm_source=qr" target="_blank">@ykk388</a></p>
-<p>Yardım: <a href="mailto:yilmazkarabulut@akhisarkoleji.com">yilmazkarabulut@akhisarkoleji.com</a></p>
+<p>Renk seç: <input type="color" id="color-picker"></p>
 </div>
 
 <h3>Global Skor Tablosu</h3>
@@ -83,57 +80,26 @@ const moneyDisplay=document.getElementById('money-display');
 const healthInner=document.getElementById('health-inner');
 const playerNameInput=document.getElementById('player-name-input');
 const nameScreen=document.getElementById('name-screen');
+const nameCard=document.getElementById('name-card');
 const leftBtn=document.getElementById('left-btn');
 const rightBtn=document.getElementById('right-btn');
+const shop=document.getElementById('shop');
+const shopToggle=document.getElementById('shop-toggle');
 const shopItems=document.querySelectorAll('.shop-item');
+const colorPicker=document.getElementById('color-picker');
 
-let score=0,money=100,health=100,playerPos=175,keys={},falling=[],selectedHat='',selectedOutfit='',selectedFace='',gameActive=false;
+let score=0,money=0,health=100,playerPos=175,keys={},falling=[],selectedHat='',selectedOutfit='',selectedFace='',playerColor='#00ff00',gameActive=false;
 
 // --- Başlat ---
 startBtn.onclick=function(){
 window.playerName=playerNameInput.value||'Oyuncu';
 nameScreen.style.display='none';
-startGame();
-};
-
-restartBtn.onclick=function(){
-overlay.style.display='none';
+nameCard.style.display='block';
+nameCard.textContent='Oyuncu: '+window.playerName;
+loadData();
 startGame();
 };
 
 // --- Shop ---
-shopItems.forEach(item=>{item.onclick=()=>{
-const cost=parseInt(item.dataset.cost),type=item.dataset.type;
-if(money>=cost){ money-=cost;if(type==='hat') selectedHat='🎩';if(type==='outfit') selectedOutfit='👕';if(type==='face') selectedFace='😎';
-moneyDisplay.textContent=money; updatePlayerAppearance();}}});
-
-function updatePlayerAppearance(){
-player.textContent=(selectedHat||'')+(selectedOutfit||'')+(selectedFace||'');
-}
-
-// --- Kontroller ---
-document.addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
-document.addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-leftBtn.addEventListener('touchstart',()=>keys['a']=true);
-leftBtn.addEventListener('touchend',()=>keys['a']=false);
-rightBtn.addEventListener('touchstart',()=>keys['d']=true);
-rightBtn.addEventListener('touchend',()=>keys['d']=false);
-
-// --- Oyun ---
-function spawn(){const obj=document.createElement('div');obj.classList.add('falling');obj.style.left=Math.random()*370+'px';obj.style.top='0px';
-const r=Math.random();if(r<0.7)obj.classList.add('coin');else if(r<0.9)obj.classList.add('enemy');else obj.classList.add('heart');
-document.getElementById('game-area').appendChild(obj);falling.push(obj);}
-function startGame(){score=0;money=100;health=100;playerPos=175;falling.forEach(o=>o.remove());falling=[];updatePlayerAppearance();scoreDisplay.textContent=score;moneyDisplay.textContent=money;healthInner.style.width='100%';gameActive=true;requestAnimationFrame(gameLoop);}
-function gameLoop(){if(!gameActive)return;
-if(keys['a']&&playerPos>0)playerPos-=5;if(keys['d']&&playerPos<350)playerPos+=5;
-player.style.left=playerPos+'px';
-if(Math.random()<0.02)spawn();
-for(let i=falling.length-1;i>=0;i--){let obj=falling[i];let t=parseInt(obj.style.top);t+=2;obj.style.top=t+'px';
-const ox=parseInt(obj.style.left);if(t+30>=350&&ox+30>playerPos&&ox<playerPos+50){if(obj.classList.contains('coin')){score+=10;money+=5;}else if(obj.classList.contains('enemy')){health-=20;}else if(obj.classList.contains('heart')){health=Math.min(100,health+20);}
-obj.remove();falling.splice(i,1);}else if(t>400){obj.remove();falling.splice(i,1);}}
-scoreDisplay.textContent=score;moneyDisplay.textContent=money;healthInner.style.width=health+'%';
-if(health<=0){gameActive=false;overlay.style.display='flex';}
-if(gameActive)requestAnimationFrame(gameLoop);}
-</script>
-</body>
-</html>
+shopToggle.onclick=function(){shop.style.display=(shop.style.display==='none')?'block':'none';};
+shopItems.forEach(item=>{item.onclick=
