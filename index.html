@@ -19,12 +19,13 @@ h1,h2,h3 { color:#0d6efd; }
 .bonus { background:cyan; box-shadow:0 0 15px cyan; }
 .heart { background:red; border-radius:50%; width:30px; height:30px; box-shadow:0 0 10px pink; }
 .health-bar { width:90%; max-width:400px; background:#555; height:20px; border-radius:10px; margin:10px auto; }
-.health-inner { width:100%; height:100%; background:lime; transition:width 0.3s linear; }
+.health-inner { width:100%; height:100%; background:lime; transition:width 0.5s ease; border-radius:10px; }
 #game-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); color:#fff; display:flex; flex-direction:column; justify-content:center; align-items:center; font-size:2em; border-radius:10px; display:none; z-index:100; }
 #mobile-controls { display:flex; justify-content:center; gap:20px; margin-top:10px; }
 .mobile-btn { width:60px; height:60px; font-size:24px; border:none; border-radius:50%; background:#0d6efd; color:#fff; cursor:pointer; }
 #shop { margin:20px auto; width:90%; max-width:400px; background:#222; padding:10px; border-radius:10px; }
-.shop-item { display:inline-block; margin:5px; padding:5px 10px; background:#0d6efd; border-radius:5px; cursor:pointer; }
+.shop-item { display:inline-block; margin:5px; padding:5px 10px; background:#0d6efd; border-radius:5px; cursor:pointer; user-select:none; }
+.shop-item[data-cost]::after { content: ' (' attr(data-cost) '💰)'; }
 #info { margin:20px; padding:10px; background:#111; border:1px solid #0d6efd; border-radius:10px; text-align:left; }
 #global-table { margin:10px auto; width:90%; max-width:400px; border-collapse:collapse; }
 #global-table th, #global-table td { border:1px solid #0d6efd; padding:5px; color:#fff; }
@@ -50,7 +51,7 @@ h1,h2,h3 { color:#0d6efd; }
 </div>
 
 <div class="health-bar"><div id="health-inner"></div></div>
-<p>Puan: <span id="score-display">0</span> | Para: <span id="money-display">100</span> | Zaman: <span id="time-display">0</span>s</p>
+<p>Puan: <span id="score-display">0</span> | Para: <span id="money-display">5000</span> | Zaman: <span id="time-display">0</span>s</p>
 
 <div id="mobile-controls">
   <button id="left-btn" class="mobile-btn">◀</button>
@@ -58,11 +59,11 @@ h1,h2,h3 { color:#0d6efd; }
 </div>
 
 <div id="shop">
-  <h3>Dükkan (Ücretsiz)</h3>
-  <div class="shop-item" data-type="hat">Şapka 🎩</div>
-  <div class="shop-item" data-type="outfit">Elbise 👕</div>
-  <div class="shop-item" data-type="face">Yüz 😎</div>
-  <div class="shop-item" data-type="color">Renk 🔵</div>
+  <h3>Dükkan</h3>
+  <div class="shop-item" data-type="hat" data-cost="1000">Şapka 🎩</div>
+  <div class="shop-item" data-type="outfit" data-cost="1000">Elbise 👕</div>
+  <div class="shop-item" data-type="face" data-cost="2000">Yüz 😎</div>
+  <div class="shop-item" data-type="color" data-cost="500">Renk 🔵</div>
 </div>
 
 <div id="info">
@@ -83,89 +84,109 @@ h1,h2,h3 { color:#0d6efd; }
 <script>
 document.addEventListener('DOMContentLoaded',()=>{
 
-const nameScreen=document.getElementById('name-screen');
-const playerNameInput=document.getElementById('player-name-input');
-const saveBtn=document.getElementById('save-name-btn');
-const restartBtn=document.getElementById('restart-btn');
-const gameOverlay=document.getElementById('game-overlay');
-const overlayMessage=document.getElementById('overlay-message');
-const player=document.getElementById('player');
-const gameArea=document.getElementById('game-area');
-const scoreDisplay=document.getElementById('score-display');
-const moneyDisplay=document.getElementById('money-display');
-const timeDisplay=document.getElementById('time-display');
-const healthInner=document.getElementById('health-inner');
-const shopItems=document.querySelectorAll('.shop-item');
-const globalTable=document.getElementById('global-table');
+const nameScreen = document.getElementById('name-screen');
+const playerNameInput = document.getElementById('player-name-input');
+const saveBtn = document.getElementById('save-name-btn');
+const restartBtn = document.getElementById('restart-btn');
+const gameOverlay = document.getElementById('game-overlay');
+const overlayMessage = document.getElementById('overlay-message');
+const player = document.getElementById('player');
+const gameArea = document.getElementById('game-area');
+const scoreDisplay = document.getElementById('score-display');
+const moneyDisplay = document.getElementById('money-display');
+const timeDisplay = document.getElementById('time-display');
+const healthInner = document.getElementById('health-inner');
+const shopItems = document.querySelectorAll('.shop-item');
+const globalTable = document.getElementById('global-table');
 
-let score=0, money=100, time=0, health=100, gameActive=false, playerPos=175, keys={}, selectedHat=null, selectedOutfit=null, selectedFace=null, selectedColor=null;
+let score=0, money=5000, time=0, health=100, gameActive=false, playerPos=175, keys={}, selectedHat=null, selectedOutfit=null, selectedFace=null, selectedColor=null;
 let fallingObjects=[];
 
-// Başlat butonu
+// Başlat
 saveBtn.addEventListener('click',()=>{
-  const val=playerNameInput.value.trim();
-  window.playerName=val?val:'Oyuncu';
+  const val = playerNameInput.value.trim();
+  window.playerName = val?val:'Oyuncu';
   nameScreen.style.display='none';
   startGame();
 });
 
-// Yeniden başlat
 restartBtn.addEventListener('click',()=>{
   gameOverlay.style.display='none';
   startGame();
 });
 
 // Kontroller
-document.addEventListener('keydown',e=>{ keys[e.key.toLowerCase()]=true; });
-document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
-document.getElementById('left-btn').addEventListener('touchstart',()=>{ keys['a']=true; });
-document.getElementById('left-btn').addEventListener('touchend',()=>{ keys['a']=false; });
-document.getElementById('right-btn').addEventListener('touchstart',()=>{ keys['d']=true; });
-document.getElementById('right-btn').addEventListener('touchend',()=>{ keys['d']=false; });
+document.addEventListener('keydown', e=>{ keys[e.key.toLowerCase()]=true; });
+document.addEventListener('keyup', e=>{ keys[e.key.toLowerCase()]=false; });
+document.getElementById('left-btn').addEventListener('touchstart', ()=>{ keys['a']=true; });
+document.getElementById('left-btn').addEventListener('touchend', ()=>{ keys['a']=false; });
+document.getElementById('right-btn').addEventListener('touchstart', ()=>{ keys['d']=true; });
+document.getElementById('right-btn').addEventListener('touchend', ()=>{ keys['d']=false; });
 
-// Shop
+// Shop: tek tık ekle, çift tık kaldır
 shopItems.forEach(item=>{
   item.addEventListener('click',()=>{
-    const type=item.dataset.type;
-    if(type==='hat') selectedHat='🎩';
-    if(type==='outfit') selectedOutfit='👕';
-    if(type==='face') selectedFace='😎';
-    if(type==='color') selectedColor='cyan';
-    updatePlayerAppearance();
+    applyShopItem(item);
+  });
+  item.addEventListener('dblclick',(e)=>{
+    removeShopItem(item);
+    e.stopPropagation();
   });
 });
 
-// Oyuncu görünümü
+function applyShopItem(item){
+  const type = item.dataset.type;
+  const cost = parseInt(item.dataset.cost || 0);
+  if(cost && money>=cost){
+    money -= cost;
+    moneyDisplay.textContent = money;
+  }
+  if(type==='hat') selectedHat = '🎩';
+  if(type==='outfit') selectedOutfit = '👕';
+  if(type==='face') selectedFace = '😎';
+  if(type==='color') selectedColor = 'cyan';
+  updatePlayerAppearance();
+}
+
+function removeShopItem(item){
+  const type = item.dataset.type;
+  if(type==='hat') selectedHat = null;
+  if(type==='outfit') selectedOutfit = null;
+  if(type==='face') selectedFace = null;
+  if(type==='color') selectedColor = null;
+  updatePlayerAppearance();
+}
+
 function updatePlayerAppearance(){
   let txt='';
   if(selectedHat) txt+=selectedHat;
   if(selectedOutfit) txt+=selectedOutfit;
   if(selectedFace) txt+=selectedFace;
   player.textContent=txt;
-  if(selectedColor) player.style.background=selectedColor;
+  player.style.background = selectedColor || 'lime';
 }
 
-// Oyun Başlat
+// Oyun başlat
 function startGame(){
-  score=0; time=0; health=100; gameActive=true; playerPos=175;
-  player.style.left=playerPos+'px';
+  gameActive = true; playerPos = 175;
+  player.style.left = playerPos+'px';
   updatePlayerAppearance();
-  scoreDisplay.textContent=score;
-  moneyDisplay.textContent=money;
-  timeDisplay.textContent=time;
-  healthInner.style.width='100%';
+  scoreDisplay.textContent = score;
+  moneyDisplay.textContent = money;
+  timeDisplay.textContent = time;
+  health = 100; healthInner.style.width='100%';
   fallingObjects.forEach(o=>o.remove());
-  fallingObjects=[];
+  fallingObjects = [];
   requestAnimationFrame(gameLoop);
 }
 
 // Objeler
 function spawnObject(){
-  const obj=document.createElement('div');
+  const obj = document.createElement('div');
   obj.classList.add('falling');
-  obj.style.left=Math.random()*370+'px';
-  obj.style.top='0px';
-  const r=Math.random();
+  obj.style.left = Math.random()*370+'px';
+  obj.style.top = '0px';
+  const r = Math.random();
   if(r<0.55) obj.classList.add('coin');
   else if(r<0.85) obj.classList.add('enemy');
   else if(r<0.95) obj.classList.add('bonus');
@@ -177,19 +198,19 @@ function spawnObject(){
 // Oyun Döngüsü
 function gameLoop(){
   if(!gameActive) return;
-  time++; timeDisplay.textContent=time;
+  time++; timeDisplay.textContent = time;
 
   if(keys['a'] && playerPos>0) playerPos-=5;
   if(keys['d'] && playerPos<350) playerPos+=5;
-  player.style.left=playerPos+'px';
+  player.style.left = playerPos+'px';
 
   if(Math.random()<0.02) spawnObject();
 
-  for(let i=fallingObjects.length-1;i>=0;i--){
-    let obj=fallingObjects[i];
-    obj.style.top=parseInt(obj.style.top)+2+'px';
-    const objLeft=parseInt(obj.style.left), objTop=parseInt(obj.style.top);
-    if(objTop+30>=350 && objLeft+30>playerPos && objLeft<playerPos+50){
+  for(let i=fallingObjects.length-1; i>=0; i--){
+    let obj = fallingObjects[i];
+    obj.style.top = parseInt(obj.style.top)+2+'px';
+    const objLeft = parseInt(obj.style.left), objTop = parseInt(obj.style.top);
+    if(objTop+30 >= 350 && objLeft+30>playerPos && objLeft<playerPos+50){
       if(obj.classList.contains('coin')){ score+=10; }
       else if(obj.classList.contains('enemy')){ health-=10; }
       else if(obj.classList.contains('bonus')){ score+=20; }
@@ -198,31 +219,29 @@ function gameLoop(){
     } else if(objTop>400){ obj.remove(); fallingObjects.splice(i,1); }
   }
 
-  scoreDisplay.textContent=score;
-  healthInner.style.width=health+'%';
+  scoreDisplay.textContent = score;
+  healthInner.style.width = health+'%';
 
-  if(health<=0){ 
-    gameActive=false; 
-    overlayMessage.textContent='Kaybettiniz 😢'; 
-    gameOverlay.style.display='flex'; 
+  if(health<=0){
+    gameActive=false;
+    overlayMessage.textContent='Kaybettiniz 😢';
+    gameOverlay.style.display='flex';
   }
 
   if(gameActive) requestAnimationFrame(gameLoop);
 }
 
-// Global skor (basit örnek, gerçek online için Firebase veya başka backend gerekir)
+// Global skor (localStorage ile)
 function updateGlobalScore(name, score){
-  // şimdilik localStorage
-  let scores=JSON.parse(localStorage.getItem('globalScores')||'[]');
+  let scores = JSON.parse(localStorage.getItem('globalScores')||'[]');
   scores.push({name,score});
   scores.sort((a,b)=>b.score-a.score);
-  scores=scores.slice(0,10);
+  scores = scores.slice(0,10);
   localStorage.setItem('globalScores', JSON.stringify(scores));
   let html='<tr><th>Sıra</th><th>İsim</th><th>Skor</th></tr>';
   scores.forEach((item,i)=>{ html+='<tr><td>'+(i+1)+'</td><td>'+item.name+'</td><td>'+item.score+'</td></tr>'; });
-  globalTable.innerHTML=html;
+  globalTable.innerHTML = html;
 }
-
 });
 </script>
 </body>
